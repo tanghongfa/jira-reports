@@ -23,7 +23,7 @@ import com.atlassian.jira.security.JiraAuthenticationContext;
 import com.atlassian.jira.util.SimpleErrorCollection;
 import com.atlassian.jira.web.FieldVisibilityManager;
 import com.atlassian.jira.web.action.ProjectActionSupport;
-import com.atlassian.jira.web.bean.FieldVisibilityBean;
+//import com.atlassian.jira.web.bean.FieldVisibilityBean;
 import com.atlassian.jira.web.bean.PagerFilter;
 import com.atlassian.jira.web.util.OutlookDateManager;
 import com.atlassian.util.profiling.UtilTimerStack;
@@ -125,7 +125,7 @@ public class SingleLevelGroupByReportExtended extends AbstractReport
                     "searchRequest", request,
                     "mapperType", mapperName,
                     "customFieldManager", customFieldManager,
-                    "fieldVisibility", new FieldVisibilityBean(),
+                    //"fieldVisibility", new FieldVisibilityBean(),
                     "searchService", searchService,
                     "portlet", this);
             startingParams.put("outlookDate", 

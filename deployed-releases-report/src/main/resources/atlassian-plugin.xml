@@ -82,6 +82,7 @@
   <report name="Proteus Deployed Product Releases Report" i18n-name-key="deployed-proudct-release-report.name" key="deployed-proudct-release-report" class="com.atlassian.plugins.proteus.jira.reports.ProductsDeployedReleasesReport">
   	<description key="deployed-proudct-release-report.description">This Proteus Report Plugin can generate reports to show how many releases are deployed for a specific product over a certain period</description>
     <resource name="view" type="velocity" location="/templates/reports/deployed-proudct-release-report/view.vm"/>
+    <resource name="excel" type="velocity" location="/templates/reports/deployed-proudct-release-report/deployed-proudct-release-excel.vm" />
     <resource name="i18n" type="i18n" location="ProductDeployedReleasesReport"/>
     <label key="deployed-proudct-release-report.label"></label>
     <properties>

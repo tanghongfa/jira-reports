@@ -179,4 +179,13 @@ public class ProductsDeployedReleasesReport extends AbstractReport
             action.addError("endDate", action.getText("report.issuecreation.before.startdate"));
         }
     }
+    
+    public boolean isExcelViewSupported() {
+    	return true;
+    }
+    
+    public String generateReportExcel(ProjectActionSupport action, @SuppressWarnings("rawtypes") Map params) throws Exception {
+    	String result = "<table><tr><td>Jill</td><td>Smith</td><td>50</td></tr><tr><td>Eve</td><td>Jackson</td><td>94</td></tr><tr><td>John</td><td>Doe</td><td>80</td></tr></table>";
+    	return result;
+    }
 }

@@ -79,4 +79,37 @@
          </property>
    </properties>
   </report>
+  <report name="Proteus Deployed Product Releases Report" i18n-name-key="deployed-proudct-release-report.name" key="deployed-proudct-release-report" class="com.atlassian.plugins.proteus.jira.reports.ProductsDeployedReleasesReport">
+  	<description key="deployed-proudct-release-report.description">This Proteus Report Plugin can generate reports to show how many releases are deployed for a specific product over a certain period</description>
+    <resource name="view" type="velocity" location="/templates/reports/deployed-proudct-release-report/view.vm"/>
+    <resource name="i18n" type="i18n" location="ProductDeployedReleasesReport"/>
+    <label key="deployed-proudct-release-report.label"></label>
+    <properties>
+         <property>
+             <key>projectid</key>
+             <name>report.issuecreation.projectid.name</name>
+             <description>report.issuecreation.projectid.description</description>
+             <type>filterprojectpicker</type>
+         </property>
+         <property>
+             <key>startDate</key>
+             <name>report.issuecreation.startdate</name>
+             <description>report.issuecreation.startdate.description</description>
+             <type>date</type>
+         </property>
+         <property>
+             <key>endDate</key>
+             <name>report.issuecreation.enddate</name>
+             <description>report.issuecreation.enddate.description</description>
+             <type>date</type>
+         </property>
+         <property>
+             <key>interval</key>
+             <name>report.issuecreation.interval</name>
+             <description>report.issuecreation.interval.description</description>
+             <type>long</type>
+             <default>3</default>
+         </property>
+   </properties>
+  </report>
 </atlassian-plugin>

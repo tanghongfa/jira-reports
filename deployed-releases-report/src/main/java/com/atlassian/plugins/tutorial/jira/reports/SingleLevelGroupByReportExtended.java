@@ -87,10 +87,10 @@ public class SingleLevelGroupByReportExtended extends AbstractReport
         {
             UtilTimerStack.push("Search Count Map");
             StatsGroup statsGroup = new StatsGroup(mapper);
-            Collector hitCollector = new OneDimensionalDocIssueHitCollector(mapper.getDocumentConstant(), statsGroup,
-                    issueIndexManager.getIssueSearcher().getIndexReader(), issueFactory,
-                    fieldVisibilityManager, readerCache);
-            searchProvider.searchAndSort((request != null) ? request.getQuery() : null, searcher, hitCollector, PagerFilter.getUnlimitedFilter());
+//            Collector hitCollector = new OneDimensionalDocIssueHitCollector(mapper.getDocumentConstant(), statsGroup,
+//                    issueIndexManager.getIssueSearcher().getIndexReader(), issueFactory,
+//                    fieldVisibilityManager, readerCache);
+//            searchProvider.searchAndSort((request != null) ? request.getQuery() : null, searcher, hitCollector, PagerFilter.getUnlimitedFilter());
             return statsGroup;
         }
         finally

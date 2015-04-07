@@ -38,6 +38,7 @@ import com.atlassian.jira.web.util.OutlookDate;
 import com.atlassian.jira.web.util.OutlookDateManager;
 import com.atlassian.plugins.tutorial.jira.reports.CreationReport;
 import com.atlassian.query.Query;
+import com.atlassian.plugins.proteus.jira.issue.view.util.IssueInfoMapperHitCollector;
 
 
 public class ProductsDeployedReleasesReport extends AbstractReport
@@ -89,7 +90,8 @@ public class ProductsDeployedReleasesReport extends AbstractReport
 
         getIssueCount(startDate, endDate, interval, remoteUser, projectId);
         
-        loadIssueData(startDate, endDate, interval, remoteUser, projectId);
+        List<String> data = loadIssueData(startDate, endDate, interval, remoteUser, projectId);
+        log.error(data.toString());
 
         List<Number> normalCount = new ArrayList<Number>();
 
@@ -124,7 +126,7 @@ public class ProductsDeployedReleasesReport extends AbstractReport
         return descriptor.getHtml("view", velocityParams);
     }
     
-    private void loadIssueData(Date startDate, Date endDate, Long interval, User remoteUser, Long projectId) throws SearchException {
+    private List<String> loadIssueData(Date startDate, Date endDate, Long interval, User remoteUser, Long projectId) throws SearchException {
     	 JqlQueryBuilder queryBuilder = JqlQueryBuilder.newBuilder();
          Query query = queryBuilder.where().createdBetween(startDate, endDate).and().project(projectId).buildQuery();
          
@@ -133,24 +135,45 @@ public class ProductsDeployedReleasesReport extends AbstractReport
         
          
          IndexSearcher searcher = searchProviderFactory.getSearcher(SearchProviderFactory.ISSUE_INDEX);
-         final DocumentHitCollector hitCollector = new IssueWriterHitCollector(searcher, null, issueFactory)
+//         final DocumentHitCollector hitCollector = new IssueWriterHitCollector(searcher, null, issueFactory)
+//         {
+//             @Override
+//             protected void writeIssue(final Issue issue, final Writer writer) throws IOException
+//             {
+//                 log.error(issue.getSummary());
+//                 ChangeHistoryManager historyManager = ComponentAccessor.getChangeHistoryManager();                 
+//                 List<ChangeItemBean> changes = historyManager.getChangeItemsForField(issue, "status");
+//                 
+//                 for(ChangeItemBean change : changes) {
+//                	 log.error("hongfa..." + change.getFrom() + "," + change.getTo());
+//                 }
+//                 
+//                 
+//             }
+//         };
+         
+         List<String> data = new ArrayList<String>();
+         
+         final DocumentHitCollector hitCollector = new IssueInfoMapperHitCollector(searcher, data, issueFactory)
          {
-             @Override
-             protected void writeIssue(final Issue issue, final Writer writer) throws IOException
-             {
-                 log.error(issue.getSummary());
-                 ChangeHistoryManager historyManager = ComponentAccessor.getChangeHistoryManager();                 
-                 List<ChangeItemBean> changes = historyManager.getChangeItemsForField(issue, "status");
-                 
-                 for(ChangeItemBean change : changes) {
-                	 log.error("hongfa..." + change.getFrom() + "," + change.getTo());
-                 }
-                 
-                 
-             }
+
+			@Override
+			protected void writeIssue(Issue issue, List<String> data) {
+				log.error(issue.getSummary());
+                ChangeHistoryManager historyManager = ComponentAccessor.getChangeHistoryManager();                 
+                List<ChangeItemBean> changes = historyManager.getChangeItemsForField(issue, "status");
+                
+                for(ChangeItemBean change : changes) {
+                	String dataStr = "hongfa..." + change.getFrom() + "," + change.getTo();
+               	 	log.error(dataStr);
+               	 	data.add(dataStr);
+                }
+			}
          };
          
          searchProvider.searchAndSort(query, remoteUser, hitCollector, PagerFilter.getUnlimitedFilter());
+         
+         return data;
          
     }
     

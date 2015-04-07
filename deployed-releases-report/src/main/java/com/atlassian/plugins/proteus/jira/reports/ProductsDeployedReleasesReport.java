@@ -1,5 +1,7 @@
 package com.atlassian.plugins.proteus.jira.reports;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -8,11 +10,20 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.apache.lucene.search.IndexSearcher;
 
 import com.atlassian.core.util.DateUtils;
 import com.atlassian.crowd.embedded.api.User;
+import com.atlassian.jira.component.ComponentAccessor;
+import com.atlassian.jira.issue.DefaultIssueFactory;
+import com.atlassian.jira.issue.Issue;
+import com.atlassian.jira.issue.IssueFactory;
 import com.atlassian.jira.issue.search.SearchException;
 import com.atlassian.jira.issue.search.SearchProvider;
+import com.atlassian.jira.issue.search.SearchProviderFactory;
+import com.atlassian.jira.issue.search.SearchProviderFactoryImpl;
+import com.atlassian.jira.issue.statistics.util.DocumentHitCollector;
+import com.atlassian.jira.issue.views.util.IssueWriterHitCollector;
 import com.atlassian.jira.jql.builder.JqlQueryBuilder;
 import com.atlassian.jira.plugin.report.impl.AbstractReport;
 import com.atlassian.jira.project.ProjectManager;
@@ -20,6 +31,7 @@ import com.atlassian.jira.util.I18nHelper;
 import com.atlassian.jira.util.ParameterUtils;
 import com.atlassian.jira.web.action.ProjectActionSupport;
 import com.atlassian.jira.web.bean.I18nBean;
+import com.atlassian.jira.web.bean.PagerFilter;
 import com.atlassian.jira.web.util.OutlookDate;
 import com.atlassian.jira.web.util.OutlookDateManager;
 import com.atlassian.plugins.tutorial.jira.reports.CreationReport;
@@ -74,6 +86,8 @@ public class ProductsDeployedReleasesReport extends AbstractReport
         }
 
         getIssueCount(startDate, endDate, interval, remoteUser, projectId);
+        
+        loadIssueData(startDate, endDate, interval, remoteUser, projectId);
 
         List<Number> normalCount = new ArrayList<Number>();
 
@@ -107,6 +121,28 @@ public class ProductsDeployedReleasesReport extends AbstractReport
 
         return descriptor.getHtml("view", velocityParams);
     }
+    
+    private void loadIssueData(Date startDate, Date endDate, Long interval, User remoteUser, Long projectId) throws SearchException {
+    	 JqlQueryBuilder queryBuilder = JqlQueryBuilder.newBuilder();
+         Query query = queryBuilder.where().createdBetween(startDate, endDate).and().project(projectId).buildQuery();
+         
+         SearchProviderFactory searchProviderFactory = new SearchProviderFactoryImpl();
+         IssueFactory issueFactory = ComponentAccessor.getIssueFactory();
+         
+         IndexSearcher searcher = searchProviderFactory.getSearcher(SearchProviderFactory.ISSUE_INDEX);
+         final DocumentHitCollector hitCollector = new IssueWriterHitCollector(searcher, null, issueFactory)
+         {
+             @Override
+             protected void writeIssue(final Issue issue, final Writer writer) throws IOException
+             {
+                 log.error(issue.getSummary());
+             }
+         };
+         
+         searchProvider.searchAndSort(query, remoteUser, hitCollector, PagerFilter.getUnlimitedFilter());
+         
+    }
+    
 
     // Retrieve the issues opened during the time period specified.
     private long getOpenIssueCount(User remoteUser, Date startDate, Date endDate, Long projectId) throws SearchException

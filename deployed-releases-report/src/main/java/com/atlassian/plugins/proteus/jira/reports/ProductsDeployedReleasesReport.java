@@ -18,6 +18,8 @@ import com.atlassian.jira.component.ComponentAccessor;
 import com.atlassian.jira.issue.DefaultIssueFactory;
 import com.atlassian.jira.issue.Issue;
 import com.atlassian.jira.issue.IssueFactory;
+import com.atlassian.jira.issue.changehistory.ChangeHistoryManager;
+import com.atlassian.jira.issue.history.ChangeItemBean;
 import com.atlassian.jira.issue.search.SearchException;
 import com.atlassian.jira.issue.search.SearchProvider;
 import com.atlassian.jira.issue.search.SearchProviderFactory;
@@ -128,6 +130,7 @@ public class ProductsDeployedReleasesReport extends AbstractReport
          
          SearchProviderFactory searchProviderFactory = new SearchProviderFactoryImpl();
          IssueFactory issueFactory = ComponentAccessor.getIssueFactory();
+        
          
          IndexSearcher searcher = searchProviderFactory.getSearcher(SearchProviderFactory.ISSUE_INDEX);
          final DocumentHitCollector hitCollector = new IssueWriterHitCollector(searcher, null, issueFactory)
@@ -136,6 +139,14 @@ public class ProductsDeployedReleasesReport extends AbstractReport
              protected void writeIssue(final Issue issue, final Writer writer) throws IOException
              {
                  log.error(issue.getSummary());
+                 ChangeHistoryManager historyManager = ComponentAccessor.getChangeHistoryManager();                 
+                 List<ChangeItemBean> changes = historyManager.getChangeItemsForField(issue, "status");
+                 
+                 for(ChangeItemBean change : changes) {
+                	 log.error("hongfa..." + change.getFrom() + "," + change.getTo());
+                 }
+                 
+                 
              }
          };
          

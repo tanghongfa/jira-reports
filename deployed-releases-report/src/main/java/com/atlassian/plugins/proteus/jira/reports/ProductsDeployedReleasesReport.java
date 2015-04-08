@@ -39,6 +39,7 @@ import com.atlassian.jira.web.util.OutlookDateManager;
 import com.atlassian.plugins.tutorial.jira.reports.CreationReport;
 import com.atlassian.query.Query;
 import com.atlassian.plugins.proteus.jira.issue.view.util.DeploymentActivityRecord;
+import com.atlassian.plugins.proteus.jira.issue.view.util.IssueInfo;
 import com.atlassian.plugins.proteus.jira.issue.view.util.IssueInfoMapperHitCollector;
 
 
@@ -91,7 +92,7 @@ public class ProductsDeployedReleasesReport extends AbstractReport
 
         getIssueCount(startDate, endDate, interval, remoteUser, projectId);
         
-        List<DeploymentActivityRecord> data = loadIssueData(startDate, endDate, interval, remoteUser, projectId);
+        Map<IssueInfo, List<DeploymentActivityRecord>> data = loadIssueData(startDate, endDate, interval, remoteUser, projectId);
         log.error(data.toString());
 
         List<Number> normalCount = new ArrayList<Number>();
@@ -127,7 +128,7 @@ public class ProductsDeployedReleasesReport extends AbstractReport
         return descriptor.getHtml("view", velocityParams);
     }
     
-    private List<DeploymentActivityRecord> loadIssueData(Date startDate, Date endDate, Long interval, User remoteUser, Long projectId) throws SearchException {
+    private Map<IssueInfo, List<DeploymentActivityRecord>> loadIssueData(Date startDate, Date endDate, Long interval, User remoteUser, Long projectId) throws SearchException {
     	 JqlQueryBuilder queryBuilder = JqlQueryBuilder.newBuilder();
          Query query = queryBuilder.where().createdBetween(startDate, endDate).and().project(projectId).buildQuery();
          
@@ -136,22 +137,25 @@ public class ProductsDeployedReleasesReport extends AbstractReport
         
          
          IndexSearcher searcher = searchProviderFactory.getSearcher(SearchProviderFactory.ISSUE_INDEX);
-         List<DeploymentActivityRecord> data = new ArrayList<DeploymentActivityRecord>();
+         Map<IssueInfo, List<DeploymentActivityRecord>> data = new HashMap<IssueInfo, List<DeploymentActivityRecord>>();
          
          final DocumentHitCollector hitCollector = new IssueInfoMapperHitCollector(searcher, data, issueFactory)
          {
 
 			@Override
-			protected void writeIssue(Issue issue, List<DeploymentActivityRecord> data) {
+			protected void writeIssue(Issue issue, Map<IssueInfo, List<DeploymentActivityRecord>> data) {
 				log.error(issue.getSummary());
                 ChangeHistoryManager historyManager = ComponentAccessor.getChangeHistoryManager();                 
                 List<ChangeItemBean> changes = historyManager.getChangeItemsForField(issue, "_deployment_tracker");
-                
+                List<DeploymentActivityRecord> changeRcd = new ArrayList<DeploymentActivityRecord>();
                 for(ChangeItemBean change : changes) {
                 	String dataStr = "hongfa..." + change.getFromString() + "," + change.getToString();
                	 	log.error(dataStr);
-               	 	data.add(new DeploymentActivityRecord(change.getToString(), change.getCreated()));
+               	 	changeRcd.add(new DeploymentActivityRecord(change.getToString(), change.getCreated()));
                 }
+                IssueInfo info = new IssueInfo();
+                info.setIssueNo(issue.getKey()).setIssueTitle(issue.getSummary());
+                data.put(info, changeRcd);
 			}
          };
          

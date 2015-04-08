@@ -8,13 +8,13 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.search.IndexSearcher;
 
 import java.util.List;
+import java.util.Map;
 
 public abstract class IssueInfoMapperHitCollector extends DocumentHitCollector {
-	protected final List<DeploymentActivityRecord> data;
+	protected final Map<IssueInfo, List<DeploymentActivityRecord>> data;
 	private final IssueFactory issueFactory;
 
-	public IssueInfoMapperHitCollector(IndexSearcher searcher,
-			List<DeploymentActivityRecord> data, IssueFactory issueFactory) {
+	public IssueInfoMapperHitCollector(IndexSearcher searcher, Map<IssueInfo, List<DeploymentActivityRecord>> data, IssueFactory issueFactory) {
 		super(searcher);
 		this.data = data;
 		this.issueFactory = issueFactory;
@@ -25,5 +25,5 @@ public abstract class IssueInfoMapperHitCollector extends DocumentHitCollector {
 		writeIssue(issue, data);
 	}
 
-	protected abstract void writeIssue(Issue issue, List<DeploymentActivityRecord> data);
+	protected abstract void writeIssue(Issue issue, Map<IssueInfo, List<DeploymentActivityRecord>> data);
 }

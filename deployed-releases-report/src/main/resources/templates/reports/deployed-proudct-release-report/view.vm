@@ -7,11 +7,33 @@
 </h4>
 <br />
 <table style="width: 100%; border: 0; background-color: lightgrey">
+	<tr>
+		<th rowspan="4"></th>
+		<th rowspan="$environments.size()">Deployed Environments</th>
+	</tr>
+	<tr>
+		<th>Issue Id</th>
+		<th>Title</th>
+		<th>Component</th>
+		<th>Version</th>
+		#foreach ($env in $environments)
+	   	<th>$env</th>
+    	#end  
+	</tr>
     #foreach ($issue in $issues)
-    <tr>    	
+    <tr>
+    	<td>
+    		<a href="#">$issue.getIssueKey()</a>
+    	</td>    	
     	<td>
     		$issue.getIssueTitle()
-    	</td>  
+    	</td> 
+    	<td>
+    		TBD
+    	</td>
+    	<td>
+    		TBD
+    	</td>
     	#foreach ($env in $environments)
     	<td>
     		#set ($activity = $issue.getLastDeploymentToEnv($env))

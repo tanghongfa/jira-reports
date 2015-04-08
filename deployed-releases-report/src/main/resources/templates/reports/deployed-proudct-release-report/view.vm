@@ -7,11 +7,19 @@
 </h4>
 <br />
 <table style="width: 100%; border: 0; background-color: lightgrey">
-    #foreach ($row in $issues)
+    #foreach ($issue in $issues)
     <tr>    	
     	<td>
-    		$row.getIssueTitle()
-    	</td>        
+    		$issue.getIssueTitle()
+    	</td>  
+    	#foreach ($env in $environments)
+    	<td>
+    		#set ($activity = $issue.getLastDeploymentToEnv($env))
+    		#if($activity)
+    	       $activity.getActionTime().toString()
+    		#end
+    	</td>
+    	#end      
     </tr>
     #end
 </table>

@@ -85,21 +85,23 @@ public class ProductsDeployedReleasesReport extends AbstractReport
         
         //Load all the required data
         List<IssueInfo> data = loadIssueData(startDate, endDate, remoteUser, projectId);
+        Collections.sort(data);       
         
         Set<String> deployedEnvironments = new HashSet<String>();
-        Collections.sort(data);        
         for(int i = 0; i < data.size(); i ++) {
         	deployedEnvironments.addAll(data.get(i).getDeployedEnvironments());
         }
-             
-        
+        List<String> envList = new ArrayList<String>(deployedEnvironments);
+        Collections.sort(envList);
+                     
         // Pass the issues to the velocity template
         Map<String, Object> velocityParams = new HashMap<String, Object>();
         velocityParams.put("startDate", startDate);
         velocityParams.put("endDate", endDate);       
         velocityParams.put("projectName", projectManager.getProjectObj(projectId).getName());
-        velocityParams.put("environments", deployedEnvironments.toArray());
+        velocityParams.put("environments", envList);
         velocityParams.put("issues", data);
+        
 
         return descriptor.getHtml("view", velocityParams);
     }

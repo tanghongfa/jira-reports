@@ -6,10 +6,29 @@
     $i18n.getText('report.issuecreation.duration'): $outlookDate.formatDMY($startDate) - $outlookDate.formatDMY($endDate) 
 </h4>
 <br />
+<style>
+	table, th, td {
+	    border: 1px solid black;
+	    border-collapse: collapse;
+	}
+	th {
+	    padding: 5px;
+	    text-align: center;
+	}
+	td {
+		width: 30px;
+		height: 30px;
+		text-align: center;
+	}
+	table#t01 {
+	    width: 100%;    
+	    background-color: #f1f1c1;
+	}
+</style>
 <table style="width: 100%; border: 0; background-color: lightgrey">
 	<tr>
-		<th rowspan="4"></th>
-		<th rowspan="$environments.size()">Deployed Environments</th>
+		<th colspan="4"></th>
+		<th colspan="$environments.size()">Deployed Environments</th>
 	</tr>
 	<tr>
 		<th>Issue Id</th>
@@ -39,6 +58,8 @@
     		#set ($activity = $issue.getLastDeploymentToEnv($env))
     		#if($activity)
     	       $activity.getActionTime().toString()
+    	    #else 
+    	       ---
     		#end
     	</td>
     	#end      

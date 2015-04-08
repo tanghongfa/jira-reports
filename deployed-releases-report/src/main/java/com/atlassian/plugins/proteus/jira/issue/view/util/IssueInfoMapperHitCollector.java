@@ -11,10 +11,10 @@ import java.util.List;
 import java.util.Map;
 
 public abstract class IssueInfoMapperHitCollector extends DocumentHitCollector {
-	protected final Map<IssueInfo, List<DeploymentActivityRecord>> data;
+	protected final List<IssueInfo> data;
 	private final IssueFactory issueFactory;
 
-	public IssueInfoMapperHitCollector(IndexSearcher searcher, Map<IssueInfo, List<DeploymentActivityRecord>> data, IssueFactory issueFactory) {
+	public IssueInfoMapperHitCollector(IndexSearcher searcher, List<IssueInfo> data, IssueFactory issueFactory) {
 		super(searcher);
 		this.data = data;
 		this.issueFactory = issueFactory;
@@ -25,5 +25,5 @@ public abstract class IssueInfoMapperHitCollector extends DocumentHitCollector {
 		writeIssue(issue, data);
 	}
 
-	protected abstract void writeIssue(Issue issue, Map<IssueInfo, List<DeploymentActivityRecord>> data);
+	protected abstract void writeIssue(Issue issue, List<IssueInfo> data);
 }

@@ -103,14 +103,7 @@
              <name>report.issuecreation.enddate</name>
              <description>report.issuecreation.enddate.description</description>
              <type>date</type>
-         </property>
-         <property>
-             <key>interval</key>
-             <name>report.issuecreation.interval</name>
-             <description>report.issuecreation.interval.description</description>
-             <type>long</type>
-             <default>3</default>
-         </property>
+         </property>         
    </properties>
   </report>
 </atlassian-plugin>

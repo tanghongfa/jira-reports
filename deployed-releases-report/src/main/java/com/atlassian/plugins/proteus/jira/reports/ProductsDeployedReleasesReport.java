@@ -4,10 +4,13 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.apache.lucene.search.IndexSearcher;
@@ -75,60 +78,33 @@ public class ProductsDeployedReleasesReport extends AbstractReport
     {
         User remoteUser = action.getRemoteUser();
         I18nHelper i18nBean = new I18nBean(remoteUser);
-
-        // Retrieve the project parameter
+        
         Long projectId = ParameterUtils.getLongParam(params, "selectedProjectId");
-        // Retrieve the start and end dates and the time interval specified by the user
         Date startDate = ParameterUtils.getDateParam(params, "startDate", i18nBean.getLocale());
         Date endDate = ParameterUtils.getDateParam(params, "endDate", i18nBean.getLocale());
-        Long interval = ParameterUtils.getLongParam(params, "interval");
-
-        // Ensure that the interval is valid
-        if (interval == null || interval.longValue() <= 0)
-        {
-            interval = DEFAULT_INTERVAL;
-            log.error(action.getText("report.issuecreation.default.interval"));
-        }
-
-        getIssueCount(startDate, endDate, interval, remoteUser, projectId);
         
-        Map<IssueInfo, List<DeploymentActivityRecord>> data = loadIssueData(startDate, endDate, interval, remoteUser, projectId);
-        log.error(data.toString());
-
-        List<Number> normalCount = new ArrayList<Number>();
-
-        // Normalise the counts for the max height
-        if (maxCount != MAX_HEIGHT && maxCount > 0)
-        {
-            for (Long asLong : openIssueCounts)
-            {
-                Float floatValue = new Float((asLong.floatValue() / maxCount) * MAX_HEIGHT);
-                // Round it back to an integer
-                Integer newValue = new Integer(floatValue.intValue());
-
-                normalCount.add(newValue);
-            }
+        //Load all the required data
+        List<IssueInfo> data = loadIssueData(startDate, endDate, remoteUser, projectId);
+        
+        Set<String> deployedEnvironments = new HashSet<String>();
+        Collections.sort(data);        
+        for(int i = 0; i < data.size(); i ++) {
+        	deployedEnvironments.addAll(data.get(i).getDeployedEnvironments());
         }
-
-        if (maxCount < 0)
-            action.addErrorMessage(action.getText("report.issuecreation.error"));
-
+             
+        
         // Pass the issues to the velocity template
         Map<String, Object> velocityParams = new HashMap<String, Object>();
         velocityParams.put("startDate", startDate);
-        velocityParams.put("endDate", endDate);
-        velocityParams.put("openCount", openIssueCounts);
-        velocityParams.put("normalisedCount", normalCount);
-        velocityParams.put("dates", dates);
-        velocityParams.put("maxHeight", new Integer(MAX_HEIGHT));
-        velocityParams.put("outlookDate", outlookDateManager.getOutlookDate(i18nBean.getLocale()));
+        velocityParams.put("endDate", endDate);       
         velocityParams.put("projectName", projectManager.getProjectObj(projectId).getName());
-        velocityParams.put("interval", interval);
+        velocityParams.put("environments", deployedEnvironments.toArray());
+        velocityParams.put("issues", data);
 
         return descriptor.getHtml("view", velocityParams);
     }
     
-    private Map<IssueInfo, List<DeploymentActivityRecord>> loadIssueData(Date startDate, Date endDate, Long interval, User remoteUser, Long projectId) throws SearchException {
+    private List<IssueInfo> loadIssueData(Date startDate, Date endDate, User remoteUser, Long projectId) throws SearchException {
     	 JqlQueryBuilder queryBuilder = JqlQueryBuilder.newBuilder();
          Query query = queryBuilder.where().createdBetween(startDate, endDate).and().project(projectId).buildQuery();
          
@@ -137,13 +113,13 @@ public class ProductsDeployedReleasesReport extends AbstractReport
         
          
          IndexSearcher searcher = searchProviderFactory.getSearcher(SearchProviderFactory.ISSUE_INDEX);
-         Map<IssueInfo, List<DeploymentActivityRecord>> data = new HashMap<IssueInfo, List<DeploymentActivityRecord>>();
+         List<IssueInfo> data = new ArrayList<IssueInfo>();
          
          final DocumentHitCollector hitCollector = new IssueInfoMapperHitCollector(searcher, data, issueFactory)
          {
 
 			@Override
-			protected void writeIssue(Issue issue, Map<IssueInfo, List<DeploymentActivityRecord>> data) {
+			protected void writeIssue(Issue issue, List<IssueInfo> data) {
 				log.error(issue.getSummary());
                 ChangeHistoryManager historyManager = ComponentAccessor.getChangeHistoryManager();                 
                 List<ChangeItemBean> changes = historyManager.getChangeItemsForField(issue, "_deployment_tracker");
@@ -154,8 +130,8 @@ public class ProductsDeployedReleasesReport extends AbstractReport
                	 	changeRcd.add(new DeploymentActivityRecord(change.getToString(), change.getCreated()));
                 }
                 IssueInfo info = new IssueInfo();
-                info.setIssueNo(issue.getKey()).setIssueTitle(issue.getSummary());
-                data.put(info, changeRcd);
+                info.setIssueNo(issue.getId()).setIssueTitle(issue.getSummary()).setIssueKey(issue.getKey()).setActivityRcd(changeRcd);
+                data.add(info);
 			}
          };
          
@@ -165,47 +141,6 @@ public class ProductsDeployedReleasesReport extends AbstractReport
          
     }
     
-
-    // Retrieve the issues opened during the time period specified.
-    private long getOpenIssueCount(User remoteUser, Date startDate, Date endDate, Long projectId) throws SearchException
-    {
-        JqlQueryBuilder queryBuilder = JqlQueryBuilder.newBuilder();
-        Query query = queryBuilder.where().createdBetween(startDate, endDate).and().project(projectId).buildQuery();
-
-        return searchProvider.searchCount(query, remoteUser);
-    }
-
-    private void getIssueCount(Date startDate, Date endDate, Long interval, User remoteUser, Long projectId) throws SearchException
-    {
-        // Calculate the interval value in milliseconds
-        long intervalValue = interval.longValue() * DateUtils.DAY_MILLIS;
-        Date newStartDate;
-        long count = 0;
-
-        // Split the specified time period by the interval value
-        while (startDate.before(endDate))
-        {
-            newStartDate = new Date(startDate .getTime() + intervalValue);
-
-            // Retrieve the issues opened within the time interval
-            if (newStartDate.after(endDate))
-                count = getOpenIssueCount(remoteUser, startDate, endDate, projectId);
-            else
-                count = getOpenIssueCount(remoteUser, startDate, newStartDate, projectId);
-
-            // Store the highest count for normalisation of results
-            if (maxCount < count)
-                maxCount = count;
-
-            // Store the count and the start date for this period
-            openIssueCounts.add(new Long(count));
-            dates.add(startDate);
-
-            // Move start date to next period
-            startDate = newStartDate;
-        }
-    }
-
     // Validate the parameters set by the user.
     public void validate(ProjectActionSupport action, Map params)
     {
@@ -224,9 +159,6 @@ public class ProductsDeployedReleasesReport extends AbstractReport
 
         if (endDate == null || !outlookDate.isDatePickerDate(outlookDate.formatDMY(endDate)))
             action.addError("endDate", action.getText("report.issuecreation.enddate.required"));
-
-        if (interval == null || interval.longValue() <= 0)
-            action.addError("interval", action.getText("report.issuecreation.interval.invalid"));
 
         if (projectId == null)
             action.addError("selectedProjectId", action.getText("report.issuecreation.projectid.invalid"));

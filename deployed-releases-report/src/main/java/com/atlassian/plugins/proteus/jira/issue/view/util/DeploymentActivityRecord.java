@@ -4,7 +4,7 @@ import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DeploymentActivityRecord {
+public class DeploymentActivityRecord implements Comparable<DeploymentActivityRecord>  {
 	
 	/**
 	 * Operations that are supported by Proteus Auto Deployment

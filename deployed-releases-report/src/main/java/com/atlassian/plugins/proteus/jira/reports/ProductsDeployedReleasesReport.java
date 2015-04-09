@@ -31,7 +31,6 @@ import com.atlassian.jira.web.bean.PagerFilter;
 import com.atlassian.plugins.proteus.jira.issue.view.util.DeploymentActivityRecord;
 import com.atlassian.plugins.proteus.jira.issue.view.util.IssueInfo;
 import com.atlassian.plugins.proteus.jira.issue.view.util.IssueInfoMapperHitCollector;
-import com.atlassian.plugins.tutorial.jira.reports.CreationReport;
 import com.atlassian.query.Query;
 
 /**
@@ -39,7 +38,7 @@ import com.atlassian.query.Query;
  * This is main report implementation class
  */
 public class ProductsDeployedReleasesReport extends AbstractReport {
-    private static final Logger log = Logger.getLogger(CreationReport.class);
+    private static final Logger log = Logger.getLogger(ProductsDeployedReleasesReport.class);
 
     private final SearchProvider searchProvider;
     private final ProjectManager projectManager;

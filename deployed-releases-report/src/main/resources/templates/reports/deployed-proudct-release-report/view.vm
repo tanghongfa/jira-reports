@@ -40,30 +40,32 @@
     	#end  
 	</tr>
     #foreach ($issue in $issues)
-    <tr>
-    	<td>
-    		<a href="#">$issue.getIssueKey()</a>
-    	</td>    	
-    	<td>
-    		$issue.getIssueTitle()
-    	</td> 
-    	<td>
-    		$issue.getDeployedComponent()
-    	</td>
-    	<td>
-    		$issue.getDeployedVersion()
-    	</td>
-    	#foreach ($env in $environments)
-    	<td>
-    		#set ($activity = $issue.getLastDeploymentToEnv($env))
-    		#if($activity)
-    	       $dateTimeFormatter.format($activity.getActionDate())
-    	    #else 
-    	       ---
-    		#end
-    	</td>
-    	#end      
-    </tr>
+        #if($issue.isEverDeployed())
+            <tr>
+            	<td>
+            		<a href="#">$issue.getIssueKey()</a>
+            	</td>    	
+            	<td>
+            		$issue.getIssueTitle()
+            	</td> 
+            	<td>
+            		$issue.getDeployedComponent()
+            	</td>
+            	<td>
+            		$issue.getDeployedVersion()
+            	</td>
+            	#foreach ($env in $environments)
+            	<td>
+            		#set ($activity = $issue.getLastDeploymentToEnv($env))
+            		#if($activity)
+            	       $dateTimeFormatter.format($activity.getActionDate())
+            	    #else 
+            	       ---
+            		#end
+            	</td>
+            	#end      
+            </tr>
+        #end
     #end
 </table>
 </div>

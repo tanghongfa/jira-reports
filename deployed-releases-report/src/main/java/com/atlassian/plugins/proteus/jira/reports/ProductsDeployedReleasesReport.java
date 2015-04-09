@@ -18,6 +18,8 @@ import org.apache.lucene.search.IndexSearcher;
 import com.atlassian.core.util.DateUtils;
 import com.atlassian.crowd.embedded.api.User;
 import com.atlassian.jira.component.ComponentAccessor;
+import com.atlassian.jira.datetime.DateTimeFormatter;
+import com.atlassian.jira.datetime.DateTimeStyle;
 import com.atlassian.jira.issue.DefaultIssueFactory;
 import com.atlassian.jira.issue.Issue;
 import com.atlassian.jira.issue.IssueFactory;
@@ -63,13 +65,13 @@ public class ProductsDeployedReleasesReport extends AbstractReport
     private Collection<Date> dates = new ArrayList<Date>();
 
     private final SearchProvider searchProvider;
-    private final OutlookDateManager outlookDateManager;
-    private final ProjectManager projectManager;
+    private final ProjectManager projectManager;    
+    private final DateTimeFormatter dateTimeFormatter;
 
-    public ProductsDeployedReleasesReport(SearchProvider searchProvider, OutlookDateManager outlookDateManager, ProjectManager projectManager)
+    public ProductsDeployedReleasesReport(SearchProvider searchProvider,DateTimeFormatter dateTimeFormatter, ProjectManager projectManager)
     {
         this.searchProvider = searchProvider;
-        this.outlookDateManager = outlookDateManager;
+        this.dateTimeFormatter = dateTimeFormatter;
         this.projectManager = projectManager;
     }
 
@@ -99,6 +101,7 @@ public class ProductsDeployedReleasesReport extends AbstractReport
         velocityParams.put("startDate", startDate);
         velocityParams.put("endDate", endDate);       
         velocityParams.put("projectName", projectManager.getProjectObj(projectId).getName());
+        velocityParams.put("dateTimeFormatter", dateTimeFormatter.withStyle(DateTimeStyle.COMPLETE).forLoggedInUser());
         velocityParams.put("environments", envList);
         velocityParams.put("issues", data);
         
@@ -154,13 +157,13 @@ public class ProductsDeployedReleasesReport extends AbstractReport
         Long interval = ParameterUtils.getLongParam(params, "interval");
         Long projectId = ParameterUtils.getLongParam(params, "selectedProjectId");
 
-        OutlookDate outlookDate = outlookDateManager.getOutlookDate(i18nBean.getLocale());
-
-        if (startDate == null || !outlookDate.isDatePickerDate(outlookDate.formatDMY(startDate)))
-            action.addError("startDate", action.getText("report.issuecreation.startdate.required"));
-
-        if (endDate == null || !outlookDate.isDatePickerDate(outlookDate.formatDMY(endDate)))
-            action.addError("endDate", action.getText("report.issuecreation.enddate.required"));
+//        OutlookDate outlookDate = outlookDateManager.getOutlookDate(i18nBean.getLocale());
+//
+//        if (startDate == null || !outlookDate.isDatePickerDate(outlookDate.formatDMY(startDate)))
+//            action.addError("startDate", action.getText("report.issuecreation.startdate.required"));
+//
+//        if (endDate == null || !outlookDate.isDatePickerDate(outlookDate.formatDMY(endDate)))
+//            action.addError("endDate", action.getText("report.issuecreation.enddate.required"));
 
         if (projectId == null)
             action.addError("selectedProjectId", action.getText("report.issuecreation.projectid.invalid"));

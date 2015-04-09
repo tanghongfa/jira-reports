@@ -3,7 +3,7 @@
 <h4>
 	This is new Proteus JIRA Report
     $i18n.getText('report.issuecreation.project'): $projectName | 
-    $i18n.getText('report.issuecreation.duration'): $outlookDate.formatDMY($startDate) - $outlookDate.formatDMY($endDate) 
+    $i18n.getText('report.issuecreation.duration'): $dateTimeFormatter.format($startDate) - $dateTimeFormatter.format($endDate) 
 </h4>
 <br />
 <style>
@@ -48,16 +48,16 @@
     		$issue.getIssueTitle()
     	</td> 
     	<td>
-    		TBD
+    		$issue.getDeployedComponent()
     	</td>
     	<td>
-    		TBD
+    		$issue.getDeployedVersion()
     	</td>
     	#foreach ($env in $environments)
     	<td>
     		#set ($activity = $issue.getLastDeploymentToEnv($env))
     		#if($activity)
-    	       $activity.getActionTime().toString()
+    	       $dateTimeFormatter.format($activity.getActionDate())
     	    #else 
     	       ---
     		#end

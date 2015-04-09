@@ -1,6 +1,7 @@
 package com.atlassian.plugins.proteus.jira.issue.view.util;
 
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -58,6 +59,10 @@ public class DeploymentActivityRecord implements Comparable<DeploymentActivityRe
 		
 	public Timestamp getActionTime() {
 		return actionTime;
+	}
+	
+	public Date getActionDate() {
+		return new Date(actionTime.getTime());
 	}
 
 	public void setActionTime(Timestamp actionTime) {

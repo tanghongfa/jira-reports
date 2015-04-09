@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.apache.lucene.document.FieldSelector;
 import org.apache.lucene.search.IndexSearcher;
 
 import com.atlassian.core.util.DateUtils;
@@ -30,6 +31,7 @@ import com.atlassian.jira.issue.search.SearchProvider;
 import com.atlassian.jira.issue.search.SearchProviderFactory;
 import com.atlassian.jira.issue.search.SearchProviderFactoryImpl;
 import com.atlassian.jira.issue.statistics.util.DocumentHitCollector;
+import com.atlassian.jira.issue.statistics.util.FieldableDocumentHitCollector;
 import com.atlassian.jira.issue.views.util.IssueWriterHitCollector;
 import com.atlassian.jira.jql.builder.JqlQueryBuilder;
 import com.atlassian.jira.plugin.report.impl.AbstractReport;
@@ -111,16 +113,11 @@ public class ProductsDeployedReleasesReport extends AbstractReport
     
     private List<IssueInfo> loadIssueData(Date startDate, Date endDate, User remoteUser, Long projectId) throws SearchException {
     	 JqlQueryBuilder queryBuilder = JqlQueryBuilder.newBuilder();
-         Query query = queryBuilder.where().createdBetween(startDate, endDate).and().project(projectId).buildQuery();
+         Query query = queryBuilder.where().createdBetween(startDate, endDate).and().project(projectId).buildQuery();   
          
-         SearchProviderFactory searchProviderFactory = new SearchProviderFactoryImpl();
-         IssueFactory issueFactory = ComponentAccessor.getIssueFactory();
-        
-         
-         IndexSearcher searcher = searchProviderFactory.getSearcher(SearchProviderFactory.ISSUE_INDEX);
          List<IssueInfo> data = new ArrayList<IssueInfo>();
          
-         final DocumentHitCollector hitCollector = new IssueInfoMapperHitCollector(searcher, data, issueFactory)
+         final FieldableDocumentHitCollector hitCollector = new IssueInfoMapperHitCollector(data, ComponentAccessor.getIssueFactory())
          {
 
 			@Override
@@ -138,6 +135,7 @@ public class ProductsDeployedReleasesReport extends AbstractReport
                 info.setIssueNo(issue.getId()).setIssueTitle(issue.getSummary()).setIssueKey(issue.getKey()).setActivityRcd(changeRcd);
                 data.add(info);
 			}
+			
          };
          
          searchProvider.searchAndSort(query, remoteUser, hitCollector, PagerFilter.getUnlimitedFilter());

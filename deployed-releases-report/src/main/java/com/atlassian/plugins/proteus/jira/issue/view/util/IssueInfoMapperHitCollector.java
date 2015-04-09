@@ -2,20 +2,18 @@ package com.atlassian.plugins.proteus.jira.issue.view.util;
 
 import com.atlassian.jira.issue.Issue;
 import com.atlassian.jira.issue.IssueFactory;
-import com.atlassian.jira.issue.statistics.util.DocumentHitCollector;
+import com.atlassian.jira.issue.statistics.util.FieldableDocumentHitCollector;
 
 import org.apache.lucene.document.Document;
-import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.document.FieldSelector;
 
 import java.util.List;
-import java.util.Map;
 
-public abstract class IssueInfoMapperHitCollector extends DocumentHitCollector {
+public abstract class IssueInfoMapperHitCollector extends FieldableDocumentHitCollector {
 	protected final List<IssueInfo> data;
 	private final IssueFactory issueFactory;
 
-	public IssueInfoMapperHitCollector(IndexSearcher searcher, List<IssueInfo> data, IssueFactory issueFactory) {
-		super(searcher);
+	public IssueInfoMapperHitCollector(List<IssueInfo> data, IssueFactory issueFactory) {
 		this.data = data;
 		this.issueFactory = issueFactory;
 	}
@@ -26,4 +24,9 @@ public abstract class IssueInfoMapperHitCollector extends DocumentHitCollector {
 	}
 
 	protected abstract void writeIssue(Issue issue, List<IssueInfo> data);
+	
+	@Override
+	protected FieldSelector getFieldSelector() {
+		return null;
+	}
 }

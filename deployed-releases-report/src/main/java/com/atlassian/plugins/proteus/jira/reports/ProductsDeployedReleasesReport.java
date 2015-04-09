@@ -1,9 +1,6 @@
 package com.atlassian.plugins.proteus.jira.reports;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -12,173 +9,187 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.apache.lucene.document.FieldSelector;
-import org.apache.lucene.search.IndexSearcher;
 
-import com.atlassian.core.util.DateUtils;
-import com.atlassian.crowd.embedded.api.User;
 import com.atlassian.jira.component.ComponentAccessor;
 import com.atlassian.jira.datetime.DateTimeFormatter;
 import com.atlassian.jira.datetime.DateTimeStyle;
-import com.atlassian.jira.issue.DefaultIssueFactory;
 import com.atlassian.jira.issue.Issue;
-import com.atlassian.jira.issue.IssueFactory;
 import com.atlassian.jira.issue.changehistory.ChangeHistoryManager;
 import com.atlassian.jira.issue.history.ChangeItemBean;
 import com.atlassian.jira.issue.search.SearchException;
 import com.atlassian.jira.issue.search.SearchProvider;
-import com.atlassian.jira.issue.search.SearchProviderFactory;
-import com.atlassian.jira.issue.search.SearchProviderFactoryImpl;
-import com.atlassian.jira.issue.statistics.util.DocumentHitCollector;
 import com.atlassian.jira.issue.statistics.util.FieldableDocumentHitCollector;
-import com.atlassian.jira.issue.views.util.IssueWriterHitCollector;
 import com.atlassian.jira.jql.builder.JqlQueryBuilder;
 import com.atlassian.jira.plugin.report.impl.AbstractReport;
 import com.atlassian.jira.project.ProjectManager;
-import com.atlassian.jira.util.I18nHelper;
+import com.atlassian.jira.user.ApplicationUser;
 import com.atlassian.jira.util.ParameterUtils;
 import com.atlassian.jira.web.action.ProjectActionSupport;
-import com.atlassian.jira.web.bean.I18nBean;
 import com.atlassian.jira.web.bean.PagerFilter;
-import com.atlassian.jira.web.util.OutlookDate;
-import com.atlassian.jira.web.util.OutlookDateManager;
-import com.atlassian.plugins.tutorial.jira.reports.CreationReport;
-import com.atlassian.query.Query;
 import com.atlassian.plugins.proteus.jira.issue.view.util.DeploymentActivityRecord;
 import com.atlassian.plugins.proteus.jira.issue.view.util.IssueInfo;
 import com.atlassian.plugins.proteus.jira.issue.view.util.IssueInfoMapperHitCollector;
+import com.atlassian.plugins.tutorial.jira.reports.CreationReport;
+import com.atlassian.query.Query;
 
-
-public class ProductsDeployedReleasesReport extends AbstractReport
-{
+/**
+ * 
+ * This is main report implementation class
+ */
+public class ProductsDeployedReleasesReport extends AbstractReport {
     private static final Logger log = Logger.getLogger(CreationReport.class);
 
-    // The max height for each bar in the histogram
-    private static final int MAX_HEIGHT = 200;
-    // Default interval value
-    private Long DEFAULT_INTERVAL = new Long(7);
-
-    // The highest issue count encountered in a search
-    private long maxCount = 0;
-    // A collection of issue open counts
-    private Collection<Long> openIssueCounts = new ArrayList<Long>();
-    // A collection of interval start dates - correlating with the openIssueCount collection.
-    private Collection<Date> dates = new ArrayList<Date>();
-
     private final SearchProvider searchProvider;
-    private final ProjectManager projectManager;    
+    private final ProjectManager projectManager;
     private final DateTimeFormatter dateTimeFormatter;
 
-    public ProductsDeployedReleasesReport(SearchProvider searchProvider,DateTimeFormatter dateTimeFormatter, ProjectManager projectManager)
-    {
+    /**
+     * 
+     * Creates a new instance of
+     * <code>ProductsDeployedReleasesReport</code>.
+     * 
+     * @param searchProvider
+     * @param dateTimeFormatter
+     * @param projectManager
+     * 
+     */
+    public ProductsDeployedReleasesReport(SearchProvider searchProvider, DateTimeFormatter dateTimeFormatter,
+            ProjectManager projectManager) {
         this.searchProvider = searchProvider;
         this.dateTimeFormatter = dateTimeFormatter;
         this.projectManager = projectManager;
     }
 
-    // Generate the report
-    public String generateReportHtml(ProjectActionSupport action, Map params) throws Exception
-    {
-        User remoteUser = action.getRemoteUser();
-        I18nHelper i18nBean = new I18nBean(remoteUser);
-        
+    /**
+     * Generating the HTML(String) Report
+     */
+    @Override
+    public String generateReportHtml(ProjectActionSupport action, Map params) throws Exception {
+        ApplicationUser remoteUser = action.getLoggedInApplicationUser();
+
         Long projectId = ParameterUtils.getLongParam(params, "selectedProjectId");
-        Date startDate = ParameterUtils.getDateParam(params, "startDate", i18nBean.getLocale());
-        Date endDate = ParameterUtils.getDateParam(params, "endDate", i18nBean.getLocale());
-        
-        //Load all the required data
+        Date startDate = dateTimeFormatter.withStyle(DateTimeStyle.DATE_PICKER).forLoggedInUser()
+                .parse((String) params.get("startDate"));
+        Date endDate = dateTimeFormatter.withStyle(DateTimeStyle.DATE_PICKER).forLoggedInUser()
+                .parse((String) params.get("endDate"));
+
+        // Load all the required data
         List<IssueInfo> data = loadIssueData(startDate, endDate, remoteUser, projectId);
-        Collections.sort(data);       
-        
+        Collections.sort(data);
+
+        // Get all the deployed environment information
         Set<String> deployedEnvironments = new HashSet<String>();
-        for(int i = 0; i < data.size(); i ++) {
-        	deployedEnvironments.addAll(data.get(i).getDeployedEnvironments());
+        for (int i = 0; i < data.size(); i++) {
+            deployedEnvironments.addAll(data.get(i).getDeployedEnvironments());
         }
         List<String> envList = new ArrayList<String>(deployedEnvironments);
         Collections.sort(envList);
-                     
+
         // Pass the issues to the velocity template
         Map<String, Object> velocityParams = new HashMap<String, Object>();
         velocityParams.put("startDate", startDate);
-        velocityParams.put("endDate", endDate);       
+        velocityParams.put("endDate", endDate);
         velocityParams.put("projectName", projectManager.getProjectObj(projectId).getName());
         velocityParams.put("dateTimeFormatter", dateTimeFormatter.withStyle(DateTimeStyle.COMPLETE).forLoggedInUser());
         velocityParams.put("environments", envList);
         velocityParams.put("issues", data);
-        
 
         return descriptor.getHtml("view", velocityParams);
     }
-    
-    private List<IssueInfo> loadIssueData(Date startDate, Date endDate, User remoteUser, Long projectId) throws SearchException {
-    	 JqlQueryBuilder queryBuilder = JqlQueryBuilder.newBuilder();
-         Query query = queryBuilder.where().createdBetween(startDate, endDate).and().project(projectId).buildQuery();   
-         
-         List<IssueInfo> data = new ArrayList<IssueInfo>();
-         
-         final FieldableDocumentHitCollector hitCollector = new IssueInfoMapperHitCollector(data, ComponentAccessor.getIssueFactory())
-         {
 
-			@Override
-			protected void writeIssue(Issue issue, List<IssueInfo> data) {
-				log.error(issue.getSummary());
-                ChangeHistoryManager historyManager = ComponentAccessor.getChangeHistoryManager();                 
+    /**
+     * This function will search the JIRA database and get the
+     * filtered issue result set and then extract/transform the
+     * information for deployment/roll back activities.
+     * 
+     * TDOO: This function could be reused by other reports.If that is
+     * the case, just move this function out.
+     * 
+     * @param startDate
+     * @param endDate
+     * @param remoteUser
+     * @param projectId
+     * @return List<IssueInfo> data
+     * @throws SearchException
+     */
+    private List<IssueInfo> loadIssueData(Date startDate, Date endDate, ApplicationUser remoteUser, Long projectId)
+            throws SearchException {
+        JqlQueryBuilder queryBuilder = JqlQueryBuilder.newBuilder();
+        Query query = queryBuilder.where().createdBetween(startDate, endDate).and().project(projectId).buildQuery();
+
+        List<IssueInfo> data = new ArrayList<IssueInfo>();
+
+        final FieldableDocumentHitCollector hitCollector = new IssueInfoMapperHitCollector(data,
+                ComponentAccessor.getIssueFactory()) {
+
+            @Override
+            protected void writeIssue(Issue issue, List<IssueInfo> result) {
+
+                ChangeHistoryManager historyManager = ComponentAccessor.getChangeHistoryManager();
                 List<ChangeItemBean> changes = historyManager.getChangeItemsForField(issue, "_deployment_tracker");
                 List<DeploymentActivityRecord> changeRcd = new ArrayList<DeploymentActivityRecord>();
-                for(ChangeItemBean change : changes) {
-                	String dataStr = "hongfa..." + change.getFromString() + "," + change.getToString();
-               	 	log.error(dataStr);
-               	 	changeRcd.add(new DeploymentActivityRecord(change.getToString(), change.getCreated()));
-                }
-                IssueInfo info = new IssueInfo();
-                info.setIssueNo(issue.getId()).setIssueTitle(issue.getSummary()).setIssueKey(issue.getKey()).setActivityRcd(changeRcd);
-                data.add(info);
-			}
-			
-         };
-         
-         searchProvider.searchAndSort(query, remoteUser, hitCollector, PagerFilter.getUnlimitedFilter());
-         
-         return data;
-         
-    }
-    
-    // Validate the parameters set by the user.
-    public void validate(ProjectActionSupport action, Map params)
-    {
-        User remoteUser = action.getRemoteUser();
-        I18nHelper i18nBean = new I18nBean(remoteUser);
 
-        Date startDate = ParameterUtils.getDateParam(params, "startDate", i18nBean.getLocale());
-        Date endDate = ParameterUtils.getDateParam(params, "endDate", i18nBean.getLocale());
-        Long interval = ParameterUtils.getLongParam(params, "interval");
+                for (ChangeItemBean change : changes) {
+                    changeRcd.add(new DeploymentActivityRecord(change.getToString(), change.getCreated()));
+                }
+
+                IssueInfo info = new IssueInfo();
+                info.setIssueNo(issue.getId()).setIssueTitle(issue.getSummary()).setIssueKey(issue.getKey())
+                        .setActivityRcd(changeRcd);
+
+                result.add(info);
+            }
+
+        };
+
+        searchProvider.searchAndSort(query, remoteUser, hitCollector, PagerFilter.getUnlimitedFilter());
+
+        return data;
+
+    }
+
+    // Validate the parameters set by the user.
+    @Override
+    public void validate(ProjectActionSupport action, Map params) {
+        String startDateParam = (String) params.get("startDate");
+        String endDateParam = (String) params.get("endDate");
+        Date startDate = null;
+        Date endDate = null;
+
+        if (StringUtils.isNotEmpty(startDateParam)) {
+            log.error("Hongfa...xx" + startDateParam);
+            startDate = dateTimeFormatter.withStyle(DateTimeStyle.DATE_PICKER).forLoggedInUser().parse(startDateParam);
+        }
+        if (StringUtils.isNotEmpty(endDateParam)) {
+            endDate = dateTimeFormatter.withStyle(DateTimeStyle.DATE_PICKER).forLoggedInUser().parse(endDateParam);
+        }
+
         Long projectId = ParameterUtils.getLongParam(params, "selectedProjectId");
 
-//        OutlookDate outlookDate = outlookDateManager.getOutlookDate(i18nBean.getLocale());
-//
-//        if (startDate == null || !outlookDate.isDatePickerDate(outlookDate.formatDMY(startDate)))
-//            action.addError("startDate", action.getText("report.issuecreation.startdate.required"));
-//
-//        if (endDate == null || !outlookDate.isDatePickerDate(outlookDate.formatDMY(endDate)))
-//            action.addError("endDate", action.getText("report.issuecreation.enddate.required"));
+        if (startDate == null) {
+            action.addError("startDate", "Please choose a start date for the report");
+        }
 
-        if (projectId == null)
-            action.addError("selectedProjectId", action.getText("report.issuecreation.projectid.invalid"));
+        if ((endDate == null) || endDate.before(startDate)) {
+            action.addError("endDate", "Please choose a valid end date for the report");
+        }
 
-        // The end date must be after the start date
-        if (startDate != null && endDate != null && endDate.before(startDate))
-        {
-            action.addError("endDate", action.getText("report.issuecreation.before.startdate"));
+        if (projectId == null) {
+            action.addError("selectedProjectId", "Please choose a valid project ID");
         }
     }
-    
+
+    @Override
     public boolean isExcelViewSupported() {
-    	return true;
+        return true;
     }
-    
-    public String generateReportExcel(ProjectActionSupport action, @SuppressWarnings("rawtypes") Map params) throws Exception {
-    	String result = "<table><tr><td>Jill</td><td>Smith</td><td>50</td></tr><tr><td>Eve</td><td>Jackson</td><td>94</td></tr><tr><td>John</td><td>Doe</td><td>80</td></tr></table>";
-    	return result;
+
+    @Override
+    public String generateReportExcel(ProjectActionSupport action, @SuppressWarnings("rawtypes") Map params)
+            throws Exception {
+        String result = "<table><tr><td>Jill</td><td>Smith</td><td>50</td></tr><tr><td>Eve</td><td>Jackson</td><td>94</td></tr><tr><td>John</td><td>Doe</td><td>80</td></tr></table>";
+        return result;
     }
 }

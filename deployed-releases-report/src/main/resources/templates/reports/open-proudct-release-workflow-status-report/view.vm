@@ -1,0 +1,71 @@
+<div style="padding: 5px">
+<!-- Display the report configuration -->
+<h4>
+	This is new Proteus JIRA Report
+    $i18n.getText('report.issuecreation.project'): $projectName | 
+    $i18n.getText('report.issuecreation.duration'): $dateTimeFormatter.format($startDate) - $dateTimeFormatter.format($endDate) 
+</h4>
+<br />
+<style>
+	table, th, td {
+	    border: 1px solid black;
+	    border-collapse: collapse;
+	}
+	th {
+	    padding: 5px;
+	    text-align: center;
+	}
+	td {
+		width: 30px;
+		height: 30px;
+		text-align: center;
+	}
+	table#t01 {
+	    width: 100%;    
+	    background-color: #f1f1c1;
+	}
+</style>
+<table style="width: 100%; border: 0; background-color: lightgrey">
+	<tr>
+		<th colspan="4"></th>
+		<th colspan="$environments.size()">Deployed Environments</th>
+	</tr>
+	<tr>
+		<th>Issue Id</th>
+		<th>Title</th>
+		<th>Component</th>
+		<th>Version</th>
+		#foreach ($env in $environments)
+	   	<th>$env</th>
+    	#end  
+	</tr>
+    #foreach ($issue in $issues)
+        #if($issue.isEverDeployed())
+            <tr>
+            	<td>
+            		<a href="#">$issue.getIssueKey()</a>
+            	</td>    	
+            	<td>
+            		$issue.getIssueTitle()
+            	</td> 
+            	<td>
+            		$issue.getDeployedComponent()
+            	</td>
+            	<td>
+            		$issue.getDeployedVersion()
+            	</td>
+            	#foreach ($env in $environments)
+            	<td>
+            		#set ($activity = $issue.getLastDeploymentToEnv($env))
+            		#if($activity)
+            	       $dateTimeFormatter.format($activity.getActionDate())
+            	    #else 
+            	       ---
+            		#end
+            	</td>
+            	#end      
+            </tr>
+        #end
+    #end
+</table>
+</div>

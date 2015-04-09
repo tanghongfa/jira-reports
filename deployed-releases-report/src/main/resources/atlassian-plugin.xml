@@ -47,4 +47,19 @@
          </property>         
    </properties>
   </report>
+  <report name="Proteus Product Releases Workflow Status Report" i18n-name-key="open-proudct-release-workflow-status-report.name" key="open-proudct-release-workflow-status-report" class="com.atlassian.plugins.proteus.jira.reports.ProductsOpenReleaseWorkflowStatusReport">
+    <description key="open-proudct-release-workflow-status-report.description">This Proteus Report Plugin can generate reports for all the workflow status of the Open product releases</description>
+    <resource name="view" type="velocity" location="/templates/reports/open-proudct-release-workflow-status-report/view.vm"/>
+    <resource name="excel" type="velocity" location="/templates/reports/open-proudct-release-workflow-status-report/excel.vm" />
+    <resource name="i18n" type="i18n" location="OpenProductReleaseWorkflowStatusReport"/>
+    <label key="open-proudct-release-workflow-status-report.label"></label>
+    <properties>
+         <property>
+             <key>projectid</key>
+             <name>report.issuecreation.projectid.name</name>
+             <description>report.issuecreation.projectid.description</description>
+             <type>filterprojectpicker</type>
+         </property>            
+   </properties>
+  </report>
 </atlassian-plugin>

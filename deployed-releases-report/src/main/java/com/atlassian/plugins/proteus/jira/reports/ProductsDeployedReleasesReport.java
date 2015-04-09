@@ -44,6 +44,8 @@ public class ProductsDeployedReleasesReport extends AbstractReport {
     private final ProjectManager projectManager;
     private final DateTimeFormatter dateTimeFormatter;
 
+    private final static String JIRA_CUSTOM_FILED_DEPLOYMENT_TRACKER = "_deployment_tracker";
+
     /**
      * 
      * Creates a new instance of
@@ -127,7 +129,8 @@ public class ProductsDeployedReleasesReport extends AbstractReport {
             protected void writeIssue(Issue issue, List<IssueInfo> result) {
 
                 ChangeHistoryManager historyManager = ComponentAccessor.getChangeHistoryManager();
-                List<ChangeItemBean> changes = historyManager.getChangeItemsForField(issue, "_deployment_tracker");
+                List<ChangeItemBean> changes = historyManager.getChangeItemsForField(issue,
+                        JIRA_CUSTOM_FILED_DEPLOYMENT_TRACKER);
                 List<DeploymentActivityRecord> changeRcd = new ArrayList<DeploymentActivityRecord>();
 
                 for (ChangeItemBean change : changes) {
@@ -158,7 +161,6 @@ public class ProductsDeployedReleasesReport extends AbstractReport {
         Date endDate = null;
 
         if (StringUtils.isNotEmpty(startDateParam)) {
-            log.error("Hongfa...xx" + startDateParam);
             startDate = dateTimeFormatter.withStyle(DateTimeStyle.DATE_PICKER).forLoggedInUser().parse(startDateParam);
         }
         if (StringUtils.isNotEmpty(endDateParam)) {

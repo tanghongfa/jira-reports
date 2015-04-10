@@ -6,10 +6,14 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 /**
  * The purpose of this class is to record issue info
  */
 public class IssueInfo implements Comparable<IssueInfo> {
+
+    private static final Logger log = Logger.getLogger(IssueInfo.class);
 
     private Long issueNo;
     private String issueKey;
@@ -33,33 +37,58 @@ public class IssueInfo implements Comparable<IssueInfo> {
         return issueNo;
     }
 
+    /**
+     * @param issueNo
+     * @return IssueInfo
+     */
     public IssueInfo setIssueNo(Long issueNo) {
         this.issueNo = issueNo;
         return this;
     }
 
+    /**
+     * @return String
+     */
     public String getIssueTitle() {
         return issueTitle;
     }
 
+    /**
+     * @param issueTitle
+     * @return IssueInfo
+     */
     public IssueInfo setIssueTitle(String issueTitle) {
         this.issueTitle = issueTitle;
         return this;
     }
 
+    /**
+     * @return String
+     */
     public String getIssueKey() {
         return issueKey;
     }
 
+    /**
+     * @param issueKey
+     * @return IssueInfo
+     */
     public IssueInfo setIssueKey(String issueKey) {
         this.issueKey = issueKey;
         return this;
     }
 
+    /**
+     * @return List<DeploymentActivityRecord>
+     */
     public List<DeploymentActivityRecord> getActivityRcd() {
         return activityRcd;
     }
 
+    /**
+     * @param activityRcd
+     * @return IssueInfo
+     */
     public IssueInfo setActivityRcd(List<DeploymentActivityRecord> activityRcd) {
         this.activityRcd = activityRcd;
         Collections.sort(this.activityRcd);
@@ -74,10 +103,16 @@ public class IssueInfo implements Comparable<IssueInfo> {
         return this;
     }
 
+    /**
+     * @return String
+     */
     public String getDeployedComponent() {
         return deployedComponent;
     }
 
+    /**
+     * @return String
+     */
     public String getDeployedVersion() {
         return deployedVersion;
     }
@@ -98,7 +133,7 @@ public class IssueInfo implements Comparable<IssueInfo> {
      * 
      * @param environment The environment name. When null, it means
      *            any environment.
-     * @return
+     * @return DeploymentActivityRecord
      */
     public DeploymentActivityRecord getLastDeploymentToEnv(String environment) {
         if (activityRcd == null) {
@@ -127,6 +162,33 @@ public class IssueInfo implements Comparable<IssueInfo> {
         return null;
     }
 
+    /**
+     * @param environment environment value can't be null
+     * @return DeploymentActivityRecord
+     */
+    public DeploymentActivityRecord getLastSuccessDeploymentToEnv(String environment) {
+        log.error(activityRcd);
+        boolean gotLastSuccessDeployToEnvRcd = false;
+        for (int i = 0; i < activityRcd.size(); i++) {
+            DeploymentActivityRecord activity = activityRcd.get(i);
+            if (activity.getEnvironment().equalsIgnoreCase(environment)) {
+                if (gotLastSuccessDeployToEnvRcd
+                        && activity.getAction().equalsIgnoreCase(DeploymentActivityRecord.ACTION_TYPE_START_DEPLOY)) {
+                    return activity;
+                }
+
+                if (activity.getAction().equalsIgnoreCase(DeploymentActivityRecord.ACTION_TYPE_SUCCESS_DEPLOYED)) {
+                    gotLastSuccessDeployToEnvRcd = true;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @return Set<String>
+     */
     public Set<String> getDeployedEnvironments() {
         Set<String> envHash = new HashSet<String>();
         for (int i = 0; i < activityRcd.size(); i++) {
@@ -135,6 +197,9 @@ public class IssueInfo implements Comparable<IssueInfo> {
         return envHash;
     }
 
+    /**
+     * @return boolean
+     */
     public boolean isEverDeployed() {
         return (activityRcd != null) && (activityRcd.size() > 0);
     }

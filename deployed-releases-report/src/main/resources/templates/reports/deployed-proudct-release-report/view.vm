@@ -56,7 +56,11 @@
             	</td>
             	#foreach ($env in $environments)
             	<td>
-            		#set ($activity = $issue.getLastSuccessDeploymentToEnv($env))
+                    #if($deploymentResult == "success")
+            		  #set ($activity = $issue.getLastSuccessDeploymentToEnv($env))
+            		#else
+            		  #set ($activity = $issue.getLastDeploymentToEnv($env))
+            		#end
             		#if($activity)
             	       $dateTimeFormatter.format($activity.getActionDate())
             	    #else 

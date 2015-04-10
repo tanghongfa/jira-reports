@@ -44,7 +44,23 @@
              <name>report.issuecreation.enddate</name>
              <description>report.issuecreation.enddate.description</description>
              <type>date</type>
-         </property>         
+         </property>
+         <property>
+            <key>deploymentResult</key>
+            <name>report.proteus.jira.deploymentresult</name>
+            <description>report.proteus.jira.deploymentresult.description</description>
+            <type>select</type>
+            <values>
+                <value>
+                    <key>success</key>
+                    <value>report.proteus.jira.deploymentresult.success</value>
+                </value>
+                <value>
+                    <key>all</key>
+                    <value>report.proteus.jira.deploymentresult.all</value>
+                </value>
+            </values>
+        </property>       
    </properties>
   </report>
   <report name="Proteus Product Releases Workflow Status Report" i18n-name-key="open-proudct-release-workflow-status-report.name" key="open-proudct-release-workflow-status-report" class="com.atlassian.plugins.proteus.jira.reports.ProductsOpenReleaseWorkflowStatusReport">

@@ -163,6 +163,17 @@ public class IssueInfo implements Comparable<IssueInfo> {
     }
 
     /**
+     * This function is to find the last successful deployment to an
+     * env. It has been taking consideration of the following
+     * scenarios: 1) people did multi deployments to the same
+     * environment, those deployment could be success or failure
+     * whatever, the result here is capturing the "End/Final" state of
+     * the deployment to that environment 2) people made mistake when
+     * they choose the "Deployment Result". They changed the result
+     * between "Success" and "Failure" back and forth. Here the result
+     * only cares about the last(final) status. It doesn't care about
+     * any status before the last one.
+     * 
      * @param environment environment value can't be null
      * @return DeploymentActivityRecord
      */
@@ -172,13 +183,21 @@ public class IssueInfo implements Comparable<IssueInfo> {
         for (int i = 0; i < activityRcd.size(); i++) {
             DeploymentActivityRecord activity = activityRcd.get(i);
             if (activity.getEnvironment().equalsIgnoreCase(environment)) {
+
+                //If it has been confirmed that the final deployment status to this environment is successful, then try to get the last deployment time/activity
                 if (gotLastSuccessDeployToEnvRcd
                         && activity.getAction().equalsIgnoreCase(DeploymentActivityRecord.ACTION_TYPE_START_DEPLOY)) {
                     return activity;
                 }
 
+                //The last status shows deployment to this environment is successful, just continue the loop to find when the deployment kicked off
                 if (activity.getAction().equalsIgnoreCase(DeploymentActivityRecord.ACTION_TYPE_SUCCESS_DEPLOYED)) {
                     gotLastSuccessDeployToEnvRcd = true;
+                }
+
+                //The last status shows deployment to this environment is failed
+                if (activity.getAction().equalsIgnoreCase(DeploymentActivityRecord.ACTION_TYPE_FAIL_DEPLOYED)) {
+                    return null;
                 }
             }
         }

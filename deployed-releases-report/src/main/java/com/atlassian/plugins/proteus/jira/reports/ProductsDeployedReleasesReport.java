@@ -34,7 +34,6 @@ import com.atlassian.plugins.proteus.jira.issue.view.util.IssueInfoMapperHitColl
 import com.atlassian.query.Query;
 
 /**
- * 
  * This is main report implementation class
  */
 public class ProductsDeployedReleasesReport extends AbstractReport {
@@ -47,14 +46,12 @@ public class ProductsDeployedReleasesReport extends AbstractReport {
     private final static String JIRA_CUSTOM_FILED_DEPLOYMENT_TRACKER = "_deployment_tracker";
 
     /**
-     * 
      * Creates a new instance of
      * <code>ProductsDeployedReleasesReport</code>.
      * 
      * @param searchProvider
      * @param dateTimeFormatter
      * @param projectManager
-     * 
      */
     public ProductsDeployedReleasesReport(SearchProvider searchProvider, DateTimeFormatter dateTimeFormatter,
             ProjectManager projectManager) {
@@ -92,6 +89,7 @@ public class ProductsDeployedReleasesReport extends AbstractReport {
         Map<String, Object> velocityParams = new HashMap<String, Object>();
         velocityParams.put("startDate", startDate);
         velocityParams.put("endDate", endDate);
+        velocityParams.put("deploymentResult", params.get("deploymentResult"));
         velocityParams.put("projectName", projectManager.getProjectObj(projectId).getName());
         velocityParams.put("dateTimeFormatter", dateTimeFormatter.withStyle(DateTimeStyle.COMPLETE).forLoggedInUser());
         velocityParams.put("environments", envList);
@@ -103,10 +101,9 @@ public class ProductsDeployedReleasesReport extends AbstractReport {
     /**
      * This function will search the JIRA database and get the
      * filtered issue result set and then extract/transform the
-     * information for deployment/roll back activities.
-     * 
-     * TDOO: This function could be reused by other reports.If that is
-     * the case, just move this function out.
+     * information for deployment/roll back activities. TDOO: This
+     * function could be reused by other reports.If that is the case,
+     * just move this function out.
      * 
      * @param startDate
      * @param endDate

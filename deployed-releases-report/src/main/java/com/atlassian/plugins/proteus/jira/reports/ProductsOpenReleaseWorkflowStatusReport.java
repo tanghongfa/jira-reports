@@ -11,14 +11,12 @@ package com.atlassian.plugins.proteus.jira.reports;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.atlassian.jira.component.ComponentAccessor;
@@ -30,6 +28,7 @@ import com.atlassian.jira.issue.history.ChangeItemBean;
 import com.atlassian.jira.issue.search.SearchException;
 import com.atlassian.jira.issue.search.SearchProvider;
 import com.atlassian.jira.issue.statistics.util.FieldableDocumentHitCollector;
+import com.atlassian.jira.issue.status.category.StatusCategory;
 import com.atlassian.jira.jql.builder.JqlQueryBuilder;
 import com.atlassian.jira.plugin.report.impl.AbstractReport;
 import com.atlassian.jira.project.ProjectManager;
@@ -52,14 +51,12 @@ public class ProductsOpenReleaseWorkflowStatusReport extends AbstractReport {
     private final static String JIRA_CUSTOM_FILED_DEPLOYMENT_TRACKER = "_deployment_tracker";
 
     /**
-     * 
      * Creates a new instance of
      * <code>ProductsDeployedReleasesReport</code>.
      * 
      * @param searchProvider
      * @param dateTimeFormatter
      * @param projectManager
-     * 
      */
     public ProductsOpenReleaseWorkflowStatusReport(SearchProvider searchProvider, DateTimeFormatter dateTimeFormatter,
             ProjectManager projectManager) {
@@ -74,15 +71,10 @@ public class ProductsOpenReleaseWorkflowStatusReport extends AbstractReport {
     @Override
     public String generateReportHtml(ProjectActionSupport action, Map params) throws Exception {
         ApplicationUser remoteUser = action.getLoggedInApplicationUser();
-
         Long projectId = ParameterUtils.getLongParam(params, "selectedProjectId");
-        Date startDate = dateTimeFormatter.withStyle(DateTimeStyle.DATE_PICKER).forLoggedInUser()
-                .parse((String) params.get("startDate"));
-        Date endDate = dateTimeFormatter.withStyle(DateTimeStyle.DATE_PICKER).forLoggedInUser()
-                .parse((String) params.get("endDate"));
 
         // Load all the required data
-        List<IssueInfo> data = loadIssueData(startDate, endDate, remoteUser, projectId);
+        List<IssueInfo> data = loadIssueData(remoteUser, projectId);
         Collections.sort(data);
 
         // Get all the deployed environment information
@@ -95,8 +87,6 @@ public class ProductsOpenReleaseWorkflowStatusReport extends AbstractReport {
 
         // Pass the issues to the velocity template
         Map<String, Object> velocityParams = new HashMap<String, Object>();
-        velocityParams.put("startDate", startDate);
-        velocityParams.put("endDate", endDate);
         velocityParams.put("projectName", projectManager.getProjectObj(projectId).getName());
         velocityParams.put("dateTimeFormatter", dateTimeFormatter.withStyle(DateTimeStyle.COMPLETE).forLoggedInUser());
         velocityParams.put("environments", envList);
@@ -108,10 +98,9 @@ public class ProductsOpenReleaseWorkflowStatusReport extends AbstractReport {
     /**
      * This function will search the JIRA database and get the
      * filtered issue result set and then extract/transform the
-     * information for deployment/roll back activities.
-     * 
-     * TDOO: This function could be reused by other reports.If that is
-     * the case, just move this function out.
+     * information for deployment/roll back activities. TDOO: This
+     * function could be reused by other reports.If that is the case,
+     * just move this function out.
      * 
      * @param startDate
      * @param endDate
@@ -120,10 +109,10 @@ public class ProductsOpenReleaseWorkflowStatusReport extends AbstractReport {
      * @return List<IssueInfo> data
      * @throws SearchException
      */
-    private List<IssueInfo> loadIssueData(Date startDate, Date endDate, ApplicationUser remoteUser, Long projectId)
-            throws SearchException {
+    private List<IssueInfo> loadIssueData(ApplicationUser remoteUser, Long projectId) throws SearchException {
         JqlQueryBuilder queryBuilder = JqlQueryBuilder.newBuilder();
-        Query query = queryBuilder.where().createdBetween(startDate, endDate).and().project(projectId).buildQuery();
+        Query query = queryBuilder.where().not().statusCategory(StatusCategory.COMPLETE).and().project(projectId)
+                .buildQuery();
 
         List<IssueInfo> data = new ArrayList<IssueInfo>();
 
@@ -132,6 +121,8 @@ public class ProductsOpenReleaseWorkflowStatusReport extends AbstractReport {
 
             @Override
             protected void writeIssue(Issue issue, List<IssueInfo> result) {
+
+                log.error("hongfa..." + issue.getSummary());
 
                 ChangeHistoryManager historyManager = ComponentAccessor.getChangeHistoryManager();
                 List<ChangeItemBean> changes = historyManager.getChangeItemsForField(issue,
@@ -160,27 +151,7 @@ public class ProductsOpenReleaseWorkflowStatusReport extends AbstractReport {
     // Validate the parameters set by the user.
     @Override
     public void validate(ProjectActionSupport action, Map params) {
-        String startDateParam = (String) params.get("startDate");
-        String endDateParam = (String) params.get("endDate");
-        Date startDate = null;
-        Date endDate = null;
-
-        if (StringUtils.isNotEmpty(startDateParam)) {
-            startDate = dateTimeFormatter.withStyle(DateTimeStyle.DATE_PICKER).forLoggedInUser().parse(startDateParam);
-        }
-        if (StringUtils.isNotEmpty(endDateParam)) {
-            endDate = dateTimeFormatter.withStyle(DateTimeStyle.DATE_PICKER).forLoggedInUser().parse(endDateParam);
-        }
-
         Long projectId = ParameterUtils.getLongParam(params, "selectedProjectId");
-
-        if (startDate == null) {
-            action.addError("startDate", "Please choose a start date for the report");
-        }
-
-        if ((endDate == null) || endDate.before(startDate)) {
-            action.addError("endDate", "Please choose a valid end date for the report");
-        }
 
         if (projectId == null) {
             action.addError("selectedProjectId", "Please choose a valid project ID");

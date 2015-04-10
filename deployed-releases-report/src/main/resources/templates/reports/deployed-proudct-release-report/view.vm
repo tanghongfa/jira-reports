@@ -5,6 +5,20 @@
     $i18n.getText('report.issuecreation.project'): $projectName | 
     $i18n.getText('report.issuecreation.duration'): $dateTimeFormatter.format($startDate) - $dateTimeFormatter.format($endDate) 
 </h4>
+
+<div>
+   <ul>
+     <li>Report Project Name:$projectName</li>
+     <li>Report Time Period:  $dateTimeFormatter.format($startDate) - $dateTimeFormatter.format($endDate)</li>
+     <li>Report Result Set: 
+        #if($deploymentResult == "success")
+            Success Deployments Only
+        #else
+            All Deployments
+        #end
+     </li>
+   </ul>
+</div>
 <br />
 <style>
 	table, th, td {

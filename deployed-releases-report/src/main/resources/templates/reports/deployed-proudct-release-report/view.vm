@@ -44,10 +44,83 @@ table {
     color: #707070;
     width: 150px;
 }
+.btn-default {
+  color: #333;
+  background-color: #fff;
+  border-color: #ccc;
+}
+.btn {
+  display: inline-block;
+  padding: 6px 12px;
+  margin-bottom: 0;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.42857143;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  -ms-touch-action: manipulation;
+  touch-action: manipulation;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  background-image: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+}
+.btn-default {
+  color: #333;
+  background-color: #fff;
+  border-color: #ccc;
+  text-decoration: none;
+}
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+button, html input[type=button], input[type=reset], input[type=submit] {
+  -webkit-appearance: button;
+  cursor: pointer;
+}
+button, select {
+  text-transform: none;
+}
+button {
+  overflow: visible;
+}
+button, input, optgroup, select, textarea {
+  margin: 0;
+  font: inherit;
+  color: inherit;
+}
+[role=button] {
+  cursor: pointer;
+}
+.btn-default:focus,
+.btn-default:active,
+.btn-default.active
+{
+  background-color: #ffffff;
+  text-decoration: none;
+}
+.btn-default:hover
+{
+  background-color: #ebebeb;
+  text-decoration: none;
+}
 </style>
-
-
+<script>
+AJS.$(document).ready(function() {
+    AJS.$("#download-excel-link").attr("href", AJS.$(".excel a").attr("href"));
+});
+</script>
 <div style="padding: 5px">
+<div style="height: 12px;">
+<a id="download-excel-link" class="btn btn-default" href="#" role="button" style="float:right; clear:right;">Download Report as Excel</a>
+</div>
 <!-- Display the report configuration -->
 <div class="report-section-header">
 Report Information:
@@ -91,7 +164,7 @@ Report Details:
         #if($issue.isEverDeployed())
             <tr>
             	<td>
-            		<a href="#">$issue.getIssueKey()</a>
+            		<a href="/jira/browse/$issue.getIssueKey()">$issue.getIssueKey()</a>
             	</td>    	
             	<td>
             		$issue.getIssueTitle()

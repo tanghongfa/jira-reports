@@ -94,6 +94,7 @@ public class ProductsDeployedReleasesReport extends AbstractReport {
         velocityParams.put("dateTimeFormatter", dateTimeFormatter.withStyle(DateTimeStyle.COMPLETE).forLoggedInUser());
         velocityParams.put("environments", envList);
         velocityParams.put("issues", data);
+        velocityParams.put("today", new Date());
 
         return descriptor.getHtml("view", velocityParams);
     }
@@ -187,7 +188,7 @@ public class ProductsDeployedReleasesReport extends AbstractReport {
     @Override
     public String generateReportExcel(ProjectActionSupport action, @SuppressWarnings("rawtypes") Map params)
             throws Exception {
-        String result = "<table><tr><td>Jill</td><td>Smith</td><td>50</td></tr><tr><td>Eve</td><td>Jackson</td><td>94</td></tr><tr><td>John</td><td>Doe</td><td>80</td></tr></table>";
+        String result = generateReportHtml(action, params);//"<table><tr><td>Jill</td><td>Smith</td><td>50</td></tr><tr><td>Eve</td><td>Jackson</td><td>94</td></tr><tr><td>John</td><td>Doe</td><td>80</td></tr></table>";
         return result;
     }
 }

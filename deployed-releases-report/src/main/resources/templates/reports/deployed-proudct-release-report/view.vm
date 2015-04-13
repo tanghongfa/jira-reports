@@ -5,10 +5,50 @@
 div.aui-message.info {
     display:none;
 }
+table {
+  background-color: transparent;
+}
+table {
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+.table>thead:first-child>tr:first-child>th {
+    border-top: 0;
+}
+.table>thead>tr>th {
+  vertical-align: bottom;
+  border-bottom: 2px solid #ddd;
+}
+.table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
+  padding: 8px;
+  line-height: 1.42857143;
+  vertical-align: top;
+  border-top: 1px solid #ddd;
+}
+.table-report {
+  width: 100%;
+  text-align: center;
+}
+.table-striped>tbody>tr:nth-of-type(odd) {
+  background-color: #f9f9f9;
+}
+.report-section-header {
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 5px;
+  background-color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+.table-desc tr>td:first-child{
+    color: #707070;
+    width: 150px;
+}
 </style>
+
+
 <div style="padding: 5px">
 <!-- Display the report configuration -->
-
 <div class="report-section-header">
 Report Information:
 </div>
@@ -26,51 +66,12 @@ Report Information:
             #end
         </td>
    </tr>
-   <tr><td>Generated On:</td><td>20150413</td></tr>
+   <tr><td>Generated On:</td><td>$dateTimeFormatter.format($today)</td></tr>
    </table>
 </div>
 <br />
-<style>
-	table {
-      background-color: transparent;
-    }
-    table {
-      border-spacing: 0;
-      border-collapse: collapse;
-    }
-    .table>thead:first-child>tr:first-child>th {
-        border-top: 0;
-    }
-    .table>thead>tr>th {
-      vertical-align: bottom;
-      border-bottom: 2px solid #ddd;
-    }
-    .table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
-      padding: 8px;
-      line-height: 1.42857143;
-      vertical-align: top;
-      border-top: 1px solid #ddd;
-    }
-    .table-report {
-      width: 100%;
-      text-align: center;
-    }
-    .table-striped>tbody>tr:nth-of-type(odd) {
-      background-color: #f9f9f9;
-    }
-    .report-section-header {
-      border-bottom: 1px solid #ccc;
-      padding-bottom: 5px;
-      background-color: #fff;
-      font-size: 16px;
-      font-weight: bold;
-      margin-bottom: 8px;
-    }
-    .table-desc tr>td:first-child{
-        color: #707070;
-        width: 150px;
-    }
-</style>
+
+<!--Report Details section-->
 <div class="report-section-header">
 Report Details:
 </div>

@@ -176,6 +176,7 @@ Report Details:
             		$issue.getDeployedVersion()
             	</td>
             	#foreach ($env in $environments)
+            	#set ($activity = false)
             	<td>
                     #if($deploymentResult == "success")
             		  #set ($activity = $issue.getLastSuccessDeploymentToEnv($env))

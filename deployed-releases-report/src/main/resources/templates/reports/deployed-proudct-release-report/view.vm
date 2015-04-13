@@ -9,24 +9,26 @@ div.aui-message.info {
 <div style="padding: 5px">
 <!-- Display the report configuration -->
 
+<div class="report-section-header">
+Report Information:
+</div>
 <div>
-   <p>Report Details:</p>
-   <table>
-   <tr><td>Report Project Name:</td><td><span class="report-info">$projectName</span></td></tr>
-   <tr><td>Report Time Period:</td><td><span class="report-info">$dateTimeFormatter.format($startDate) - $dateTimeFormatter.format($endDate)</span></td></tr>
-   <tr><td>Report Result Set:</td>
-        <td><span class="report-info">
+   <p></p>
+   <table class="table-desc">
+   <tr><td>Project Name:</td><td>$projectName</td></tr>
+   <tr><td>Time Period:</td><td>$dateTimeFormatter.format($startDate) - $dateTimeFormatter.format($endDate)</td></tr>
+   <tr><td>Result Set:</td>
+        <td>
             #if($deploymentResult == "success")
                 Success Deployments Only
             #else
                 All Deployments
             #end
-            </span></td>
+        </td>
    </tr>
-   <tr><td>Report Generated On:</td><td>20150413</td></tr>
+   <tr><td>Generated On:</td><td>20150413</td></tr>
    </table>
 </div>
-<div id="descriptionmodule_heading" class="mod-header"><ul class="ops"></ul><h2 class="toggle-title">Description</h2></div>
 <br />
 <style>
 	table {
@@ -56,17 +58,22 @@ div.aui-message.info {
     .table-striped>tbody>tr:nth-of-type(odd) {
       background-color: #f9f9f9;
     }
-    .mod-header {
-        background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAADCAYAAABS3WWCAAAAGXRFW…I/PvXFWFAAAAAYSURBVHjaYvj//z8D0/Pnz/8zgFgAAQYAS5UJscReGMIAAAAASUVORK5CYII=) repeat-x scroll 0 10px;
+    .report-section-header {
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 5px;
+      background-color: #fff;
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 8px;
     }
-    .mod-header:before, .mod-header:after {
-      content: " ";
-      display: table;
-    }
-    .mod-header:after {
-      clear: both;
+    .table-desc tr>td:first-child{
+        color: #707070;
+        width: 150px;
     }
 </style>
+<div class="report-section-header">
+Report Details:
+</div>
 <table class="table table-striped table-report">
     <thead>
 	<tr>

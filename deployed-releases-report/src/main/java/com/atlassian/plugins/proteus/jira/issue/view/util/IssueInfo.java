@@ -1,5 +1,6 @@
 package com.atlassian.plugins.proteus.jira.issue.view.util;
 
+import java.sql.Timestamp;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -18,6 +19,7 @@ public class IssueInfo implements Comparable<IssueInfo> {
     private Long issueNo;
     private String issueKey;
     private String issueTitle;
+    private String issueStatus;
 
     /**
      * Right now, we have assumed for each of the JIRA issue, we will
@@ -29,6 +31,8 @@ public class IssueInfo implements Comparable<IssueInfo> {
     private String deployedVersion;
 
     private List<DeploymentActivityRecord> activityRcd;
+    private List<SortableChangeHistoryItem> statusChangeRcd;
+    private List<SortableChangeHistoryItem> environmentChangeRcd;
 
     /**
      * @return issueNo
@@ -117,6 +121,56 @@ public class IssueInfo implements Comparable<IssueInfo> {
         return deployedVersion;
     }
 
+    /**
+     * @return List<SortableChangeHistoryItem>
+     */
+    public List<SortableChangeHistoryItem> getStatusChangeRcd() {
+        return statusChangeRcd;
+    }
+
+    /**
+     * @param statusChangeRcd
+     * @return IssueInfo
+     */
+    public IssueInfo setStatusChangeRcd(List<SortableChangeHistoryItem> statusChangeRcd) {
+        this.statusChangeRcd = statusChangeRcd;
+        Collections.sort(this.statusChangeRcd);
+        return this;
+    }
+
+    /**
+     * @return List<SortableChangeHistoryItem>
+     */
+    public List<SortableChangeHistoryItem> getEnvironmentChangeRcd() {
+        return environmentChangeRcd;
+    }
+
+    /**
+     * @param environmentChangeRcd
+     * @return IssueInfo
+     */
+    public IssueInfo setEnvironmentChangeRcd(List<SortableChangeHistoryItem> environmentChangeRcd) {
+        this.environmentChangeRcd = environmentChangeRcd;
+        Collections.sort(this.environmentChangeRcd);
+        return this;
+    }
+
+    /**
+     * @return String
+     */
+    public String getIssueStatus() {
+        return issueStatus;
+    }
+
+    /**
+     * @param issueStatus
+     * @return IssueInfo
+     */
+    public IssueInfo setIssueStatus(String issueStatus) {
+        this.issueStatus = issueStatus;
+        return this;
+    }
+
     @Override
     public String toString() {
         return this.issueTitle;
@@ -202,6 +256,42 @@ public class IssueInfo implements Comparable<IssueInfo> {
             }
         }
 
+        return null;
+    }
+
+    private SortableChangeHistoryItem getItemBefore(List<SortableChangeHistoryItem> itemLst, Timestamp timestamp) {
+        for (int i = 0; i < itemLst.size(); i++) {
+            if (itemLst.get(i).getCreated().before(timestamp)) {
+                return itemLst.get(i);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @param environment
+     * @return String
+     */
+    public String getLastStatusValueToEnv(String environment) {
+        //No environment has set... pre-deploy to any environment
+
+        for (int i = 0; i < this.environmentChangeRcd.size(); i++) {
+            SortableChangeHistoryItem item = this.environmentChangeRcd.get(i);
+            if ((environment.isEmpty() && item.getFromString().isEmpty())
+                    || (environment.equalsIgnoreCase(item.getFromString()))) {
+                SortableChangeHistoryItem lastStatusChange = getItemBefore(this.statusChangeRcd, item.getCreated());
+                if (lastStatusChange != null) {
+                    //There are status change before this environment valuable change. Get the last "TO"
+                    return lastStatusChange.getToString();
+                } else if (this.statusChangeRcd.size() > 0) {
+                    //There is no status change before this environment change, Get the the earliest  
+                    return this.statusChangeRcd.get(this.statusChangeRcd.size() - 1).getFromString();
+                } else {
+                    //This is no status change at all, then just Get the current status.
+                    return this.issueStatus;
+                }
+            }
+        }
         return null;
     }
 

@@ -126,6 +126,10 @@ public class DeploymentActivityRecord implements Comparable<DeploymentActivityRe
         return builder.toString();
     }
 
+    /**
+     * Will always sorted in reverse order (latest item is at the
+     * beginning of the sorted result)
+     */
     @Override
     public int compareTo(DeploymentActivityRecord anotherRcd) {
         return anotherRcd.getActionTime().compareTo(this.getActionTime());

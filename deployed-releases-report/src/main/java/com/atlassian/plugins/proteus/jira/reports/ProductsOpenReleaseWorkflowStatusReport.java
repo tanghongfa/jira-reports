@@ -12,10 +12,8 @@ package com.atlassian.plugins.proteus.jira.reports;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -24,6 +22,8 @@ import com.atlassian.jira.datetime.DateTimeFormatter;
 import com.atlassian.jira.datetime.DateTimeStyle;
 import com.atlassian.jira.issue.Issue;
 import com.atlassian.jira.issue.changehistory.ChangeHistoryManager;
+import com.atlassian.jira.issue.customfields.option.Options;
+import com.atlassian.jira.issue.fields.CustomField;
 import com.atlassian.jira.issue.history.ChangeItemBean;
 import com.atlassian.jira.issue.search.SearchException;
 import com.atlassian.jira.issue.search.SearchProvider;
@@ -36,9 +36,9 @@ import com.atlassian.jira.user.ApplicationUser;
 import com.atlassian.jira.util.ParameterUtils;
 import com.atlassian.jira.web.action.ProjectActionSupport;
 import com.atlassian.jira.web.bean.PagerFilter;
-import com.atlassian.plugins.proteus.jira.issue.view.util.DeploymentActivityRecord;
 import com.atlassian.plugins.proteus.jira.issue.view.util.IssueInfo;
 import com.atlassian.plugins.proteus.jira.issue.view.util.IssueInfoMapperHitCollector;
+import com.atlassian.plugins.proteus.jira.issue.view.util.SortableChangeHistoryItem;
 import com.atlassian.query.Query;
 
 public class ProductsOpenReleaseWorkflowStatusReport extends AbstractReport {
@@ -48,7 +48,8 @@ public class ProductsOpenReleaseWorkflowStatusReport extends AbstractReport {
     private final ProjectManager projectManager;
     private final DateTimeFormatter dateTimeFormatter;
 
-    private final static String JIRA_CUSTOM_FILED_DEPLOYMENT_TRACKER = "_deployment_tracker";
+    private final static String JIRA_CUSTOM_FILED_DEPLOYED_ENVIRONMENT = "DVN2 Environment";
+    private final static String JIRA_FILED_STATUS = "Status";
 
     /**
      * Creates a new instance of
@@ -78,12 +79,14 @@ public class ProductsOpenReleaseWorkflowStatusReport extends AbstractReport {
         Collections.sort(data);
 
         // Get all the deployed environment information
-        Set<String> deployedEnvironments = new HashSet<String>();
-        for (int i = 0; i < data.size(); i++) {
-            deployedEnvironments.addAll(data.get(i).getDeployedEnvironments());
+        CustomField cf = ComponentAccessor.getCustomFieldManager().getCustomFieldObjectByName(
+                JIRA_CUSTOM_FILED_DEPLOYED_ENVIRONMENT);
+        Options options = ComponentAccessor.getOptionsManager().getOptions(
+                cf.getConfigurationSchemes().listIterator().next().getOneAndOnlyConfig());
+        List<String> envList = new ArrayList<String>();
+        for (int i = 0; i < options.size(); i++) {
+            envList.add(options.get(i).getValue());
         }
-        List<String> envList = new ArrayList<String>(deployedEnvironments);
-        Collections.sort(envList);
 
         // Pass the issues to the velocity template
         Map<String, Object> velocityParams = new HashMap<String, Object>();
@@ -119,23 +122,34 @@ public class ProductsOpenReleaseWorkflowStatusReport extends AbstractReport {
         final FieldableDocumentHitCollector hitCollector = new IssueInfoMapperHitCollector(data,
                 ComponentAccessor.getIssueFactory()) {
 
+            private List<SortableChangeHistoryItem> getFieldSortableChangeHistory(ChangeHistoryManager historyManager,
+                    Issue issue, String fieldName) {
+                List<ChangeItemBean> changes = historyManager.getChangeItemsForField(issue, fieldName);
+                List<SortableChangeHistoryItem> changeRcd = new ArrayList<SortableChangeHistoryItem>();
+
+                for (ChangeItemBean change : changes) {
+                    changeRcd.add(new SortableChangeHistoryItem(change));
+                }
+
+                log.error(changeRcd);
+
+                return changeRcd;
+            }
+
             @Override
             protected void writeIssue(Issue issue, List<IssueInfo> result) {
 
                 log.error("hongfa..." + issue.getSummary());
 
-                ChangeHistoryManager historyManager = ComponentAccessor.getChangeHistoryManager();
-                List<ChangeItemBean> changes = historyManager.getChangeItemsForField(issue,
-                        JIRA_CUSTOM_FILED_DEPLOYMENT_TRACKER);
-                List<DeploymentActivityRecord> changeRcd = new ArrayList<DeploymentActivityRecord>();
-
-                for (ChangeItemBean change : changes) {
-                    changeRcd.add(new DeploymentActivityRecord(change.getToString(), change.getCreated()));
-                }
-
                 IssueInfo info = new IssueInfo();
                 info.setIssueNo(issue.getId()).setIssueTitle(issue.getSummary()).setIssueKey(issue.getKey())
-                        .setActivityRcd(changeRcd);
+                        .setIssueStatus(issue.getStatusObject().getGenericValue().toString());
+
+                ChangeHistoryManager historyManager = ComponentAccessor.getChangeHistoryManager();
+                info.setStatusChangeRcd(this.getFieldSortableChangeHistory(historyManager, issue, issue
+                        .getStatusObject().getName()));
+                info.setEnvironmentChangeRcd(this.getFieldSortableChangeHistory(historyManager, issue,
+                        JIRA_CUSTOM_FILED_DEPLOYED_ENVIRONMENT));
 
                 result.add(info);
             }

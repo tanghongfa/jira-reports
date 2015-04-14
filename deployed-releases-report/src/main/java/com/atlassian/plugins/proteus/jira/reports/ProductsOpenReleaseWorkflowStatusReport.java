@@ -143,7 +143,7 @@ public class ProductsOpenReleaseWorkflowStatusReport extends AbstractReport {
 
                 IssueInfo info = new IssueInfo();
                 info.setIssueNo(issue.getId()).setIssueTitle(issue.getSummary()).setIssueKey(issue.getKey())
-                        .setIssueStatus(issue.getStatusObject().getGenericValue().toString());
+                        .setIssueStatus(issue.getStatusObject().getName());
 
                 ChangeHistoryManager historyManager = ComponentAccessor.getChangeHistoryManager();
                 info.setStatusChangeRcd(this.getFieldSortableChangeHistory(historyManager, issue, issue

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 /**
@@ -277,7 +278,7 @@ public class IssueInfo implements Comparable<IssueInfo> {
 
         for (int i = 0; i < this.environmentChangeRcd.size(); i++) {
             SortableChangeHistoryItem item = this.environmentChangeRcd.get(i);
-            if ((environment.isEmpty() && item.getFromString().isEmpty())
+            if ((StringUtils.isEmpty(environment) && StringUtils.isEmpty(item.getFromString()))
                     || (environment.equalsIgnoreCase(item.getFromString()))) {
                 SortableChangeHistoryItem lastStatusChange = getItemBefore(this.statusChangeRcd, item.getCreated());
                 if (lastStatusChange != null) {

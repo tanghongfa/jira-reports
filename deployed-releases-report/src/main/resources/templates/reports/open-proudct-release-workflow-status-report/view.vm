@@ -142,37 +142,35 @@ Report Details:
     <tr>
         <th>Issue Id</th>
         <th>Title</th>
-        <th>Env Independent</th>        
+        <th>Current Status</th>        
         #foreach ($env in $environments)
         <th>$env</th>
         #end  
     </tr>
     </thead>    
     #foreach ($issue in $issues)
-        #if($issue.isEverDeployed())
-            <tr>
-                <td>
-                    <a href="/jira/browse/$issue.getIssueKey()">$issue.getIssueKey()</a>
-                </td>       
-                <td>
-                    $issue.getIssueTitle()
-                </td>
-                <td>
-                    $issue.getLastStatusValueToEnv("")
-                </td>
-                #foreach ($env in $environments)
-                #set ($status = false)
-                <td>
-                    #set ($status = $issue.getLastStatusValueToEnv($env))                   
-                    #if($status)
-                      $status
-                    #else 
-                       ---
-                    #end
-                </td>
-                #end      
-            </tr>
-        #end
+        <tr>
+            <td>
+                <a href="/jira/browse/$issue.getIssueKey()">$issue.getIssueKey()</a>
+            </td>       
+            <td>
+                $issue.getIssueTitle()
+            </td>
+            <td>
+                $issue.getIssueStatus()
+            </td>
+            #foreach ($env in $environments)
+            #set ($status = false)
+            <td>
+                #set ($status = $issue.getLastStatusValueToEnv($env))                   
+                #if($status)
+                  $status
+                #else 
+                   ---
+                #end
+            </td>
+            #end      
+        </tr>
     #end
 </table>
 </div>

@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 /**
@@ -21,6 +21,7 @@ public class IssueInfo implements Comparable<IssueInfo> {
     private String issueKey;
     private String issueTitle;
     private String issueStatus;
+    private String issueDeployEnv;
 
     /**
      * Right now, we have assumed for each of the JIRA issue, we will
@@ -172,6 +173,22 @@ public class IssueInfo implements Comparable<IssueInfo> {
         return this;
     }
 
+    /**
+     * @return String
+     */
+    public String getIssueDeployEnv() {
+        return issueDeployEnv;
+    }
+
+    /**
+     * @param issueDeployEnv
+     * @return IssueInfo
+     */
+    public IssueInfo setIssueDeployEnv(String issueDeployEnv) {
+        this.issueDeployEnv = issueDeployEnv;
+        return this;
+    }
+
     @Override
     public String toString() {
         return this.issueTitle;
@@ -276,10 +293,12 @@ public class IssueInfo implements Comparable<IssueInfo> {
     public String getLastStatusValueToEnv(String environment) {
         //No environment has set... pre-deploy to any environment
 
+        if (!StringUtils.isEmpty(this.getIssueDeployEnv()) && environment.equalsIgnoreCase(this.getIssueDeployEnv())) {
+            return this.getIssueStatus();
+        }
         for (int i = 0; i < this.environmentChangeRcd.size(); i++) {
             SortableChangeHistoryItem item = this.environmentChangeRcd.get(i);
-            if ((StringUtils.isEmpty(environment) && StringUtils.isEmpty(item.getFromString()))
-                    || (environment.equalsIgnoreCase(item.getFromString()))) {
+            if (environment.equalsIgnoreCase(item.getFromString())) {
                 SortableChangeHistoryItem lastStatusChange = getItemBefore(this.statusChangeRcd, item.getCreated());
                 if (lastStatusChange != null) {
                     //There are status change before this environment valuable change. Get the last "TO"
@@ -289,10 +308,11 @@ public class IssueInfo implements Comparable<IssueInfo> {
                     return this.statusChangeRcd.get(this.statusChangeRcd.size() - 1).getFromString();
                 } else {
                     //This is no status change at all, then just Get the current status.
-                    return this.issueStatus;
+                    return this.getIssueStatus();
                 }
             }
         }
+
         return null;
     }
 

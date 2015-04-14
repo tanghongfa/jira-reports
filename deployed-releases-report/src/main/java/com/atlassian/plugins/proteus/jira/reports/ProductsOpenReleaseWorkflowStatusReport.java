@@ -21,6 +21,7 @@ import com.atlassian.jira.component.ComponentAccessor;
 import com.atlassian.jira.datetime.DateTimeFormatter;
 import com.atlassian.jira.datetime.DateTimeStyle;
 import com.atlassian.jira.issue.Issue;
+import com.atlassian.jira.issue.changehistory.ChangeHistoryItem;
 import com.atlassian.jira.issue.changehistory.ChangeHistoryManager;
 import com.atlassian.jira.issue.customfields.option.Options;
 import com.atlassian.jira.issue.fields.CustomField;
@@ -74,15 +75,16 @@ public class ProductsOpenReleaseWorkflowStatusReport extends AbstractReport {
         ApplicationUser remoteUser = action.getLoggedInApplicationUser();
         Long projectId = ParameterUtils.getLongParam(params, "selectedProjectId");
 
+        CustomField dployedEnvField = ComponentAccessor.getCustomFieldManager().getCustomFieldObjectByName(
+                JIRA_CUSTOM_FILED_DEPLOYED_ENVIRONMENT);
+
         // Load all the required data
         List<IssueInfo> data = loadIssueData(remoteUser, projectId);
         Collections.sort(data);
 
         // Get all the deployed environment information
-        CustomField cf = ComponentAccessor.getCustomFieldManager().getCustomFieldObjectByName(
-                JIRA_CUSTOM_FILED_DEPLOYED_ENVIRONMENT);
         Options options = ComponentAccessor.getOptionsManager().getOptions(
-                cf.getConfigurationSchemes().listIterator().next().getOneAndOnlyConfig());
+                dployedEnvField.getConfigurationSchemes().listIterator().next().getOneAndOnlyConfig());
         List<String> envList = new ArrayList<String>();
         for (int i = 0; i < options.size(); i++) {
             envList.add(options.get(i).getValue());
@@ -145,9 +147,22 @@ public class ProductsOpenReleaseWorkflowStatusReport extends AbstractReport {
                 info.setIssueNo(issue.getId()).setIssueTitle(issue.getSummary()).setIssueKey(issue.getKey())
                         .setIssueStatus(issue.getStatusObject().getName());
 
+                CustomField dployedEnvField = ComponentAccessor.getCustomFieldManager().getCustomFieldObjectByName(
+                        JIRA_CUSTOM_FILED_DEPLOYED_ENVIRONMENT);
+                Object customFieldValue = issue.getCustomFieldValue(dployedEnvField);
+                if (customFieldValue != null) {
+                    info.setIssueDeployEnv(customFieldValue.toString());
+                    log.error("hongfa... current env..." + info.getIssueDeployEnv());
+                }
+
                 ChangeHistoryManager historyManager = ComponentAccessor.getChangeHistoryManager();
-                info.setStatusChangeRcd(this.getFieldSortableChangeHistory(historyManager, issue, issue
-                        .getStatusObject().getName()));
+
+                List<ChangeHistoryItem> tmp = historyManager.getAllChangeItems(issue);
+                for (ChangeHistoryItem tmpItem : tmp) {
+                    log.error(tmpItem.getField());
+                }
+
+                info.setStatusChangeRcd(this.getFieldSortableChangeHistory(historyManager, issue, "status"));
                 info.setEnvironmentChangeRcd(this.getFieldSortableChangeHistory(historyManager, issue,
                         JIRA_CUSTOM_FILED_DEPLOYED_ENVIRONMENT));
 

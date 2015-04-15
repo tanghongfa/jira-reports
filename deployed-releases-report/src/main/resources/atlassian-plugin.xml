@@ -78,4 +78,31 @@
          </property>            
    </properties>
   </report>
+  <report name="Proteus Product Release Workflow Time Statics Report" i18n-name-key="product-release-workflow-time-statics-report.name" key="product-release-workflow-time-statics-report" class="com.atlassian.plugins.proteus.jira.reports.ProductsReleaseWorkflowTimeStaticsReport">
+    <description key="product-release-workflow-time-statics-report.description">This Proteus Report Plugin can generate reports to show how many releases are deployed for a specific product over a certain period</description>
+    <resource name="view" type="velocity" location="/templates/reports/product-release-workflow-time-statics-report/view.vm"/>
+    <resource name="excel" type="velocity" location="/templates/reports/product-release-workflow-time-statics-report/excel.vm" />
+    <resource name="i18n" type="i18n" location="ProductsReleaseWorkflowTimeStaticsReport"/>
+    <label key="product-release-workflow-time-statics-report.label"></label>
+    <properties>
+         <property>
+             <key>projectid</key>
+             <name>report.issuecreation.projectid.name</name>
+             <description>report.issuecreation.projectid.description</description>
+             <type>filterprojectpicker</type>
+         </property>
+         <property>
+             <key>startDate</key>
+             <name>report.issuecreation.startdate</name>
+             <description>report.issuecreation.startdate.description</description>
+             <type>date</type>
+         </property>
+         <property>
+             <key>endDate</key>
+             <name>report.issuecreation.enddate</name>
+             <description>report.issuecreation.enddate.description</description>
+             <type>date</type>
+         </property>          
+   </properties>
+  </report>
 </atlassian-plugin>

@@ -42,6 +42,9 @@ import com.atlassian.plugins.proteus.jira.issue.view.util.IssueInfoMapperHitColl
 import com.atlassian.plugins.proteus.jira.issue.view.util.SortableChangeHistoryItem;
 import com.atlassian.query.Query;
 
+/**
+ * The purpose of this class is for Open work flow status report
+ */
 public class ProductsOpenReleaseWorkflowStatusReport extends AbstractReport {
     private static final Logger log = Logger.getLogger(ProductsOpenReleaseWorkflowStatusReport.class);
 
@@ -50,7 +53,7 @@ public class ProductsOpenReleaseWorkflowStatusReport extends AbstractReport {
     private final DateTimeFormatter dateTimeFormatter;
 
     private final static String JIRA_CUSTOM_FILED_DEPLOYED_ENVIRONMENT = "DVN2 Environment";
-    private final static String JIRA_FILED_STATUS = "Status";
+    private final static String JIRA_FILED_STATUS = "status";
 
     /**
      * Creates a new instance of
@@ -107,8 +110,6 @@ public class ProductsOpenReleaseWorkflowStatusReport extends AbstractReport {
      * function could be reused by other reports.If that is the case,
      * just move this function out.
      * 
-     * @param startDate
-     * @param endDate
      * @param remoteUser
      * @param projectId
      * @return List<IssueInfo> data
@@ -162,7 +163,7 @@ public class ProductsOpenReleaseWorkflowStatusReport extends AbstractReport {
                     log.error(tmpItem.getField());
                 }
 
-                info.setStatusChangeRcd(this.getFieldSortableChangeHistory(historyManager, issue, "status"));
+                info.setStatusChangeRcd(this.getFieldSortableChangeHistory(historyManager, issue, JIRA_FILED_STATUS));
                 info.setEnvironmentChangeRcd(this.getFieldSortableChangeHistory(historyManager, issue,
                         JIRA_CUSTOM_FILED_DEPLOYED_ENVIRONMENT));
 

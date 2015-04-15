@@ -1,6 +1,7 @@
 package com.atlassian.plugins.proteus.jira.issue.view.util;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -24,13 +25,10 @@ public class IssueInfo implements Comparable<IssueInfo> {
     private String issueDeployEnv;
 
     /**
-     * Right now, we have assumed for each of the JIRA issue, we will
-     * only have one component & one version. It can be easily
-     * extended to support multi-components and version later on if
-     * needed.
+     * Component and Version is matched by order
      */
-    private String deployedComponent;
-    private String deployedVersion;
+    private List<String> deployedComponent;
+    private List<String> deployedVersion;
 
     private List<DeploymentActivityRecord> activityRcd;
     private List<SortableChangeHistoryItem> statusChangeRcd;
@@ -101,9 +99,16 @@ public class IssueInfo implements Comparable<IssueInfo> {
 
         DeploymentActivityRecord lastDep = this.getLastDeploymentToEnv(null);
         if (lastDep != null) {
-            Entry<String, String> oneComp = lastDep.getComponentVersionMap().entrySet().iterator().next();
-            this.deployedComponent = oneComp.getKey();
-            this.deployedVersion = oneComp.getValue();
+            java.util.Iterator<Entry<String, String>> it = lastDep.getComponentVersionMap().entrySet().iterator();
+            List<String> compLst = new ArrayList<String>();
+            List<String> versionLst = new ArrayList<String>();
+            while (it.hasNext()) {
+                Entry<String, String> oneComp = it.next();
+                compLst.add(oneComp.getKey());
+                versionLst.add(oneComp.getValue());
+            }
+            this.deployedComponent = compLst;
+            this.deployedVersion = versionLst;
         }
 
         return this;
@@ -112,14 +117,14 @@ public class IssueInfo implements Comparable<IssueInfo> {
     /**
      * @return String
      */
-    public String getDeployedComponent() {
+    public List<String> getDeployedComponent() {
         return deployedComponent;
     }
 
     /**
      * @return String
      */
-    public String getDeployedVersion() {
+    public List<String> getDeployedVersion() {
         return deployedVersion;
     }
 

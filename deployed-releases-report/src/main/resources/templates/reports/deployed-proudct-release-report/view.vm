@@ -22,7 +22,7 @@ table {
 .table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
   padding: 8px;
   line-height: 1.42857143;
-  vertical-align: top;
+  vertical-align: middle;
   border-top: 1px solid #ddd;
 }
 .table-report {
@@ -170,10 +170,14 @@ Report Details:
             		$issue.getIssueTitle()
             	</td> 
             	<td>
-            		$issue.getDeployedComponent()
+            	    #foreach ($comp in $issue.getDeployedComponent())
+            	    <p>$comp</p>
+            	    #end            		
             	</td>
             	<td>
-            		$issue.getDeployedVersion()
+            		#foreach ($compVer in $issue.getDeployedVersion())
+                    <p>$compVer</p>
+                    #end  
             	</td>
             	#foreach ($env in $environments)
             	#set ($activity = false)

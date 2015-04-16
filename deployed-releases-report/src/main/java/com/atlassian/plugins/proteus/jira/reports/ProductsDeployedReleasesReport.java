@@ -61,45 +61,6 @@ public class ProductsDeployedReleasesReport extends AbstractReport {
     }
 
     /**
-     * Generating the HTML(String) Report
-     */
-    @Override
-    public String generateReportHtml(ProjectActionSupport action, Map params) throws Exception {
-        ApplicationUser remoteUser = action.getLoggedInApplicationUser();
-
-        Long projectId = ParameterUtils.getLongParam(params, "selectedProjectId");
-        Date startDate = dateTimeFormatter.withStyle(DateTimeStyle.DATE_PICKER).forLoggedInUser()
-                .parse((String) params.get("startDate"));
-        Date endDate = dateTimeFormatter.withStyle(DateTimeStyle.DATE_PICKER).forLoggedInUser()
-                .parse((String) params.get("endDate"));
-
-        // Load all the required data
-        List<IssueInfo> data = loadIssueData(startDate, endDate, remoteUser, projectId);
-        Collections.sort(data);
-
-        // Get all the deployed environment information
-        Set<String> deployedEnvironments = new HashSet<String>();
-        for (int i = 0; i < data.size(); i++) {
-            deployedEnvironments.addAll(data.get(i).getDeployedEnvironments());
-        }
-        List<String> envList = new ArrayList<String>(deployedEnvironments);
-        Collections.sort(envList);
-
-        // Pass the issues to the velocity template
-        Map<String, Object> velocityParams = new HashMap<String, Object>();
-        velocityParams.put("startDate", startDate);
-        velocityParams.put("endDate", endDate);
-        velocityParams.put("deploymentResult", params.get("deploymentResult"));
-        velocityParams.put("projectName", projectManager.getProjectObj(projectId).getName());
-        velocityParams.put("dateTimeFormatter", dateTimeFormatter.withStyle(DateTimeStyle.COMPLETE).forLoggedInUser());
-        velocityParams.put("environments", envList);
-        velocityParams.put("issues", data);
-        velocityParams.put("today", new Date());
-
-        return descriptor.getHtml("view", velocityParams);
-    }
-
-    /**
      * This function will search the JIRA database and get the
      * filtered issue result set and then extract/transform the
      * information for deployment/roll back activities. TDOO: This
@@ -150,6 +111,43 @@ public class ProductsDeployedReleasesReport extends AbstractReport {
 
     }
 
+    private String generateReportHtml(ProjectActionSupport action, Map params, String view, boolean isExcel)
+            throws Exception {
+        ApplicationUser remoteUser = action.getLoggedInApplicationUser();
+
+        Long projectId = ParameterUtils.getLongParam(params, "selectedProjectId");
+        Date startDate = dateTimeFormatter.withStyle(DateTimeStyle.DATE_PICKER).forLoggedInUser()
+                .parse((String) params.get("startDate"));
+        Date endDate = dateTimeFormatter.withStyle(DateTimeStyle.DATE_PICKER).forLoggedInUser()
+                .parse((String) params.get("endDate"));
+
+        // Load all the required data
+        List<IssueInfo> data = loadIssueData(startDate, endDate, remoteUser, projectId);
+        Collections.sort(data);
+
+        // Get all the deployed environment information
+        Set<String> deployedEnvironments = new HashSet<String>();
+        for (int i = 0; i < data.size(); i++) {
+            deployedEnvironments.addAll(data.get(i).getDeployedEnvironments());
+        }
+        List<String> envList = new ArrayList<String>(deployedEnvironments);
+        Collections.sort(envList);
+
+        // Pass the issues to the velocity template
+        Map<String, Object> velocityParams = new HashMap<String, Object>();
+        velocityParams.put("startDate", startDate);
+        velocityParams.put("endDate", endDate);
+        velocityParams.put("deploymentResult", params.get("deploymentResult"));
+        velocityParams.put("projectName", projectManager.getProjectObj(projectId).getName());
+        velocityParams.put("dateTimeFormatter", dateTimeFormatter.withStyle(DateTimeStyle.COMPLETE).forLoggedInUser());
+        velocityParams.put("environments", envList);
+        velocityParams.put("issues", data);
+        velocityParams.put("today", new Date());
+        velocityParams.put("isExcel", isExcel);
+
+        return descriptor.getHtml(view, velocityParams);
+    }
+
     // Validate the parameters set by the user.
     @Override
     public void validate(ProjectActionSupport action, Map params) {
@@ -181,6 +179,11 @@ public class ProductsDeployedReleasesReport extends AbstractReport {
     }
 
     @Override
+    public String generateReportHtml(ProjectActionSupport action, Map params) throws Exception {
+        return generateReportHtml(action, params, "view", false);
+    }
+
+    @Override
     public boolean isExcelViewSupported() {
         return true;
     }
@@ -188,7 +191,6 @@ public class ProductsDeployedReleasesReport extends AbstractReport {
     @Override
     public String generateReportExcel(ProjectActionSupport action, @SuppressWarnings("rawtypes") Map params)
             throws Exception {
-        String result = generateReportHtml(action, params);//"<table><tr><td>Jill</td><td>Smith</td><td>50</td></tr><tr><td>Eve</td><td>Jackson</td><td>94</td></tr><tr><td>John</td><td>Doe</td><td>80</td></tr></table>";
-        return result;
+        return generateReportHtml(action, params, "view", true);
     }
 }

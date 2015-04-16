@@ -10,13 +10,12 @@
 package com.atlassian.plugins.proteus.jira.reports;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -37,9 +36,10 @@ import com.atlassian.jira.user.ApplicationUser;
 import com.atlassian.jira.util.ParameterUtils;
 import com.atlassian.jira.web.action.ProjectActionSupport;
 import com.atlassian.jira.web.bean.PagerFilter;
-import com.atlassian.plugins.proteus.jira.issue.view.util.DeploymentActivityRecord;
 import com.atlassian.plugins.proteus.jira.issue.view.util.IssueInfo;
 import com.atlassian.plugins.proteus.jira.issue.view.util.IssueInfoMapperHitCollector;
+import com.atlassian.plugins.proteus.jira.issue.view.util.SortableChangeHistoryItem;
+import com.atlassian.plugins.proteus.jira.issue.view.util.WorkflowTransitions;
 import com.atlassian.query.Query;
 
 /**
@@ -53,7 +53,7 @@ public class ProductsReleaseWorkflowTimeStaticsReport extends AbstractReport {
     private final ProjectManager projectManager;
     private final DateTimeFormatter dateTimeFormatter;
 
-    private final static String JIRA_CUSTOM_FILED_DEPLOYMENT_TRACKER = "_deployment_tracker";
+    private final static String JIRA_FILED_STATUS = "status";
 
     /**
      * Creates a new instance of
@@ -68,6 +68,32 @@ public class ProductsReleaseWorkflowTimeStaticsReport extends AbstractReport {
         this.searchProvider = searchProvider;
         this.dateTimeFormatter = dateTimeFormatter;
         this.projectManager = projectManager;
+    }
+
+    /**
+     * Try to get all the identical transitions that happened to all
+     * the involved issues. It could be possibly analysis workflow(s)
+     * associated with the issues to get this result, but that could
+     * be a huge list since couple of the status could be from changed
+     * "all" (e.g. "Close" status)
+     * 
+     * @param data
+     * @return List<WorkflowTransitions>
+     */
+    private List<WorkflowTransitions> getIdenticalTransitions(List<IssueInfo> data) {
+        Map<String, WorkflowTransitions> resultMap = new HashMap<String, WorkflowTransitions>();
+        for (IssueInfo issue : data) {
+            for (int i = 0; i < issue.getStatusChangeRcd().size(); i++) {
+                WorkflowTransitions transition = new WorkflowTransitions(issue.getStatusChangeRcd().get(i), i);
+                if (resultMap.get(transition.getUniqueId()) == null) {
+                    resultMap.put(transition.getUniqueId(), transition);
+                }
+            }
+        }
+        WorkflowTransitions[] list = resultMap.values().toArray(new WorkflowTransitions[0]);
+        List<WorkflowTransitions> result = Arrays.asList(list);
+        Collections.sort(result);
+        return result;
     }
 
     /**
@@ -88,12 +114,7 @@ public class ProductsReleaseWorkflowTimeStaticsReport extends AbstractReport {
         Collections.sort(data);
 
         // Get all the deployed environment information
-        Set<String> deployedEnvironments = new HashSet<String>();
-        for (int i = 0; i < data.size(); i++) {
-            deployedEnvironments.addAll(data.get(i).getDeployedEnvironments());
-        }
-        List<String> envList = new ArrayList<String>(deployedEnvironments);
-        Collections.sort(envList);
+        List<WorkflowTransitions> transitionsList = getIdenticalTransitions(data);
 
         // Pass the issues to the velocity template
         Map<String, Object> velocityParams = new HashMap<String, Object>();
@@ -102,7 +123,7 @@ public class ProductsReleaseWorkflowTimeStaticsReport extends AbstractReport {
         velocityParams.put("deploymentResult", params.get("deploymentResult"));
         velocityParams.put("projectName", projectManager.getProjectObj(projectId).getName());
         velocityParams.put("dateTimeFormatter", dateTimeFormatter.withStyle(DateTimeStyle.COMPLETE).forLoggedInUser());
-        velocityParams.put("environments", envList);
+        velocityParams.put("transitions", transitionsList);
         velocityParams.put("issues", data);
         velocityParams.put("today", new Date());
 
@@ -133,21 +154,28 @@ public class ProductsReleaseWorkflowTimeStaticsReport extends AbstractReport {
         final FieldableDocumentHitCollector hitCollector = new IssueInfoMapperHitCollector(data,
                 ComponentAccessor.getIssueFactory()) {
 
-            @Override
-            protected void writeIssue(Issue issue, List<IssueInfo> result) {
-
-                ChangeHistoryManager historyManager = ComponentAccessor.getChangeHistoryManager();
-                List<ChangeItemBean> changes = historyManager.getChangeItemsForField(issue,
-                        JIRA_CUSTOM_FILED_DEPLOYMENT_TRACKER);
-                List<DeploymentActivityRecord> changeRcd = new ArrayList<DeploymentActivityRecord>();
+            private List<SortableChangeHistoryItem> getFieldSortableChangeHistory(ChangeHistoryManager historyManager,
+                    Issue issue, String fieldName) {
+                List<ChangeItemBean> changes = historyManager.getChangeItemsForField(issue, fieldName);
+                List<SortableChangeHistoryItem> changeRcd = new ArrayList<SortableChangeHistoryItem>();
 
                 for (ChangeItemBean change : changes) {
-                    changeRcd.add(new DeploymentActivityRecord(change.getToString(), change.getCreated()));
+                    changeRcd.add(new SortableChangeHistoryItem(change));
                 }
 
+                log.error(changeRcd);
+
+                return changeRcd;
+            }
+
+            @Override
+            protected void writeIssue(Issue issue, List<IssueInfo> result) {
+                ChangeHistoryManager historyManager = ComponentAccessor.getChangeHistoryManager();
+
                 IssueInfo info = new IssueInfo();
-                info.setIssueNo(issue.getId()).setIssueTitle(issue.getSummary()).setIssueKey(issue.getKey())
-                        .setActivityRcd(changeRcd);
+                info.setIssueNo(issue.getId()).setIssueTitle(issue.getSummary()).setIssueKey(issue.getKey());
+
+                info.setStatusChangeRcd(this.getFieldSortableChangeHistory(historyManager, issue, JIRA_FILED_STATUS));
 
                 result.add(info);
             }

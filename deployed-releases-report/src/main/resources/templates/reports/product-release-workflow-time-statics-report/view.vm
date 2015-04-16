@@ -44,47 +44,11 @@ Report Details:
         <th>Title</th>
         <th>Component</th>
         <th>Version</th>
-        #foreach ($env in $environments)
-        <th>$env</th>
+        #foreach ($transition in $transitions)
+        <th>$transition.getFromStatus() - $transition.getToStatus()</th>
         #end  
     </tr>
 	</thead>	
-    #foreach ($issue in $issues)
-        #if($issue.isEverDeployed())
-            <tr>
-            	<td>
-            		<a href="/jira/browse/$issue.getIssueKey()">$issue.getIssueKey()</a>
-            	</td>    	
-            	<td>
-            		$issue.getIssueTitle()
-            	</td> 
-            	<td>
-            	    #foreach ($comp in $issue.getDeployedComponent())
-            	    <p>$comp</p>
-            	    #end            		
-            	</td>
-            	<td>
-            		#foreach ($compVer in $issue.getDeployedVersion())
-                    <p>$compVer</p>
-                    #end  
-            	</td>
-            	#foreach ($env in $environments)
-            	#set ($activity = false)
-            	<td>
-                    #if($deploymentResult == "success")
-            		  #set ($activity = $issue.getLastSuccessDeploymentToEnv($env))
-            		#else
-            		  #set ($activity = $issue.getLastDeploymentToEnv($env))
-            		#end
-            		#if($activity)
-            	       $dateTimeFormatter.format($activity.getActionDate())
-            	    #else 
-            	       ---
-            		#end
-            	</td>
-            	#end      
-            </tr>
-        #end
-    #end
+    
 </table>
 </div>

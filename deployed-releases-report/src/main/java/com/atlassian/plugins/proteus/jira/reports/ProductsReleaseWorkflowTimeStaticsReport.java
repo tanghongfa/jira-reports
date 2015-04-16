@@ -191,7 +191,6 @@ public class ProductsReleaseWorkflowTimeStaticsReport extends AbstractReport {
         List<WorkflowTransitions> transitionsList = getIdenticalTransitions(data);
 
         List<List<String>> tableData = getTransitionDurationData(data, transitionsList);
-        log.error(tableData);
 
         // Pass the issues to the velocity template
         Map<String, Object> velocityParams = new HashMap<String, Object>();
@@ -201,6 +200,7 @@ public class ProductsReleaseWorkflowTimeStaticsReport extends AbstractReport {
         velocityParams.put("projectName", projectManager.getProjectObj(projectId).getName());
         velocityParams.put("dateTimeFormatter", dateTimeFormatter.withStyle(DateTimeStyle.COMPLETE).forLoggedInUser());
         velocityParams.put("transitions", transitionsList);
+        velocityParams.put("tableData", tableData);
         velocityParams.put("issues", data);
         velocityParams.put("today", new Date());
 

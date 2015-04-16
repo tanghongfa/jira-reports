@@ -1,3 +1,5 @@
+#disable_html_escaping()
+
 $webResourceManager.requireResourcesForContext("jira-report-plugin")
 
 <script>
@@ -19,16 +21,7 @@ Report Information:
    <table class="table-desc">
    <tr><td>Project Name:</td><td>$projectName</td></tr>
    <tr><td>Time Period:</td><td>$dateTimeFormatter.format($startDate) - $dateTimeFormatter.format($endDate)</td></tr>
-   <tr><td>Result Set:</td>
-        <td>
-            #if($deploymentResult == "success")
-                Success Deployments Only
-            #else
-                All Deployments
-            #end
-        </td>
-   </tr>
-   <tr><td>Generated On:</td><td>$dateTimeFormatter.format($today)</td></tr>
+   <td>Generated On:</td><td>$dateTimeFormatter.format($today)</td></tr>
    </table>
 </div>
 <br />
@@ -41,13 +34,20 @@ Report Details:
     <thead>
 	<tr>
         <th>Issue Id</th>
-        <th>Title</th>
-        <th>Component</th>
-        <th>Version</th>
+        <th>Title</th>        
         #foreach ($transition in $transitions)
         <th>$transition.getFromStatus() - $transition.getToStatus()</th>
         #end  
     </tr>
+    #foreach ($rowdata in $tableData)
+        <tr>
+            #foreach ($item in $rowdata)
+            <td>
+             $item
+            </td>
+            #end
+        </tr>
+    #end
 	</thead>	
     
 </table>

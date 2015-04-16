@@ -11,6 +11,7 @@ package com.atlassian.plugins.proteus.jira.reports;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,11 +71,8 @@ public class ProductsOpenReleaseWorkflowStatusReport extends AbstractReport {
         this.projectManager = projectManager;
     }
 
-    /**
-     * Generating the HTML(String) Report
-     */
-    @Override
-    public String generateReportHtml(ProjectActionSupport action, Map params) throws Exception {
+    private String generateReportHtml(ProjectActionSupport action, Map params, String view, boolean isExcel)
+            throws Exception {
         ApplicationUser remoteUser = action.getLoggedInApplicationUser();
         Long projectId = ParameterUtils.getLongParam(params, "selectedProjectId");
 
@@ -99,8 +97,10 @@ public class ProductsOpenReleaseWorkflowStatusReport extends AbstractReport {
         velocityParams.put("dateTimeFormatter", dateTimeFormatter.withStyle(DateTimeStyle.COMPLETE).forLoggedInUser());
         velocityParams.put("environments", envList);
         velocityParams.put("issues", data);
+        velocityParams.put("today", new Date());
+        velocityParams.put("isExcel", isExcel);
 
-        return descriptor.getHtml("view", velocityParams);
+        return descriptor.getHtml(view, velocityParams);
     }
 
     /**
@@ -189,6 +189,11 @@ public class ProductsOpenReleaseWorkflowStatusReport extends AbstractReport {
     }
 
     @Override
+    public String generateReportHtml(ProjectActionSupport action, Map params) throws Exception {
+        return generateReportHtml(action, params, "view", false);
+    }
+
+    @Override
     public boolean isExcelViewSupported() {
         return true;
     }
@@ -196,7 +201,6 @@ public class ProductsOpenReleaseWorkflowStatusReport extends AbstractReport {
     @Override
     public String generateReportExcel(ProjectActionSupport action, @SuppressWarnings("rawtypes") Map params)
             throws Exception {
-        String result = "<table><tr><td>Jill</td><td>Smith</td><td>50</td></tr><tr><td>Eve</td><td>Jackson</td><td>94</td></tr><tr><td>John</td><td>Doe</td><td>80</td></tr></table>";
-        return result;
+        return generateReportHtml(action, params, "view", true);
     }
 }

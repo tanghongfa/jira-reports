@@ -82,7 +82,7 @@ public class WorkflowTransitions implements Comparable<WorkflowTransitions> {
 
     @Override
     public int compareTo(WorkflowTransitions arg0) {
-        return this.stepRating - arg0.stepRating;
+        return arg0.stepRating - this.stepRating;
     }
 
     @Override

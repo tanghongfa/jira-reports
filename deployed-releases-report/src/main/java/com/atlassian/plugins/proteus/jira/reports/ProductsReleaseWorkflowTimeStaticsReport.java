@@ -16,10 +16,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.joda.time.Period;
 
 import com.atlassian.jira.component.ComponentAccessor;
 import com.atlassian.jira.datetime.DateTimeFormatter;
@@ -105,21 +105,39 @@ public class ProductsReleaseWorkflowTimeStaticsReport extends AbstractReport {
         return result;
     }
 
-    private String formatPeriod(Period p) {
-        StringBuilder builder = new StringBuilder();
-        if (p.getDays() > 0) {
-            builder.append(p.getDays()).append("d ");
+    private String getDurationBreakdown(long millis) {
+        long time = millis;
+        if (time < 0) {
+            throw new IllegalArgumentException("Duration must be greater than zero!");
         }
-        if (p.getHours() > 0) {
-            builder.append(p.getDays()).append("h ");
+
+        long days = TimeUnit.MILLISECONDS.toDays(time);
+        time -= TimeUnit.DAYS.toMillis(days);
+        long hours = TimeUnit.MILLISECONDS.toHours(time);
+        time -= TimeUnit.HOURS.toMillis(hours);
+        long minutes = TimeUnit.MILLISECONDS.toMinutes(time);
+        time -= TimeUnit.MINUTES.toMillis(minutes);
+        long seconds = TimeUnit.MILLISECONDS.toSeconds(time);
+
+        StringBuilder sb = new StringBuilder(64);
+        if (days > 0) {
+            sb.append(days);
+            sb.append("D ");
         }
-        if (p.getMinutes() > 0) {
-            builder.append(p.getMinutes()).append("m ");
+        if (hours > 0) {
+            sb.append(hours);
+            sb.append("H ");
         }
-        if (p.getSeconds() > 0) {
-            builder.append(p.getSeconds()).append("s ");
+        if (minutes > 0) {
+            sb.append(minutes);
+            sb.append("M ");
         }
-        return builder.toString();
+        if (seconds > 0) {
+            sb.append(seconds);
+            sb.append("S");
+        }
+
+        return (sb.toString());
     }
 
     private List<List<String>> getTransitionDurationData(List<IssueInfo> data, List<WorkflowTransitions> transitions) {
@@ -139,7 +157,7 @@ public class ProductsReleaseWorkflowTimeStaticsReport extends AbstractReport {
                     average[i] += sum(timeSpend);
                     StringBuilder builder = new StringBuilder();
                     for (Integer eachItem : timeSpend) {
-                        builder.append("<p>").append(formatPeriod(Period.millis(eachItem))).append("</p>");
+                        builder.append("<p>").append(getDurationBreakdown(eachItem)).append("</p>");
                     }
                     oneRow.add(builder.toString());
                 } else {

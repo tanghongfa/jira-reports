@@ -5,12 +5,7 @@ AJS.$(document).ready(function() {
     AJS.$("#download-excel-link").attr("href", AJS.$(".excel a").attr("href"));
 });
 </script>
-<style>
-table, th, td {
-    border: 1px solid black;
-    border-collapse: collapse;
-}
-</style>
+
 <div style="padding: 5px">
 <div style="height: 12px;">
 <a id="download-excel-link" class="btn btn-default" href="#" role="button" style="float:right; clear:right;">Download Report as Excel</a>

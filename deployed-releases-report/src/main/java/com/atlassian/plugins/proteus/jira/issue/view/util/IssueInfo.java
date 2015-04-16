@@ -23,6 +23,7 @@ public class IssueInfo implements Comparable<IssueInfo> {
     private String issueTitle;
     private String issueStatus;
     private String issueDeployEnv;
+    private Timestamp issueCreated;
 
     /**
      * Component and Version is matched by order
@@ -194,6 +195,22 @@ public class IssueInfo implements Comparable<IssueInfo> {
         return this;
     }
 
+    /**
+     * @return Timestamp
+     */
+    public Timestamp getIssueCreated() {
+        return issueCreated;
+    }
+
+    /**
+     * @param issueCreated
+     * @return IssueInfo
+     */
+    public IssueInfo setIssueCreated(Timestamp issueCreated) {
+        this.issueCreated = issueCreated;
+        return this;
+    }
+
     @Override
     public String toString() {
         return this.issueTitle;
@@ -337,5 +354,24 @@ public class IssueInfo implements Comparable<IssueInfo> {
      */
     public boolean isEverDeployed() {
         return (activityRcd != null) && (activityRcd.size() > 0);
+    }
+
+    /**
+     * @param trans
+     * @return List<Long>
+     */
+    public List<Integer> getTimeSpentOnTransition(WorkflowTransitions trans) {
+        List<Integer> periods = new ArrayList<Integer>();
+        for (int i = 0, length = this.statusChangeRcd.size(); i < length; i++) {
+            if (trans.equals(this.statusChangeRcd.get(i))) {
+                if (i < (length - 1)) {
+                    periods.add((int) (this.statusChangeRcd.get(i).getCreated().getTime() - this.statusChangeRcd
+                            .get(i + 1).getCreated().getTime()));
+                } else {
+                    periods.add((int) (this.statusChangeRcd.get(i).getCreated().getTime() - this.issueCreated.getTime()));
+                }
+            }
+        }
+        return periods;
     }
 }

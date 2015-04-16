@@ -87,11 +87,16 @@ public class WorkflowTransitions implements Comparable<WorkflowTransitions> {
 
     @Override
     public boolean equals(Object object2) {
-        return (object2 != null) && (object2 instanceof WorkflowTransitions)
-                && (this.fromStatus.equalsIgnoreCase(((WorkflowTransitions) object2).getFromStatus()))
-                && (this.toStatus.equalsIgnoreCase(((WorkflowTransitions) object2).getToStatus()));
+        if ((object2 != null) && (object2 instanceof ChangeItemBean)) {
+            return this.fromStatus.equalsIgnoreCase(((ChangeItemBean) object2).getFromString())
+                    && this.toStatus.equalsIgnoreCase(((ChangeItemBean) object2).getToString());
+        }
+        return false;
     }
 
+    /**
+     * @return String
+     */
     public String getUniqueId() {
         return this.fromStatus.toLowerCase() + this.toStatus.toLowerCase();
     }

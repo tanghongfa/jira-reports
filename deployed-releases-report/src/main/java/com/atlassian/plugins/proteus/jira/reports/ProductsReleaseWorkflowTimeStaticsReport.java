@@ -19,6 +19,7 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.joda.time.Period;
 
 import com.atlassian.jira.component.ComponentAccessor;
 import com.atlassian.jira.datetime.DateTimeFormatter;
@@ -96,6 +97,61 @@ public class ProductsReleaseWorkflowTimeStaticsReport extends AbstractReport {
         return result;
     }
 
+    private Integer sum(List<Integer> list) {
+        Integer result = 0;
+        for (Integer it : list) {
+            result += it;
+        }
+        return result;
+    }
+
+    private String formatPeriod(Period p) {
+        StringBuilder builder = new StringBuilder();
+        if (p.getDays() > 0) {
+            builder.append(p.getDays()).append("d ");
+        }
+        if (p.getHours() > 0) {
+            builder.append(p.getDays()).append("h ");
+        }
+        if (p.getMinutes() > 0) {
+            builder.append(p.getMinutes()).append("m ");
+        }
+        if (p.getSeconds() > 0) {
+            builder.append(p.getSeconds()).append("s ");
+        }
+        return builder.toString();
+    }
+
+    private List<List<String>> getTransitionDurationData(List<IssueInfo> data, List<WorkflowTransitions> transitions) {
+        List<List<String>> result = new ArrayList<List<String>>();
+        Long[] average = new Long[transitions.size()];
+        for (int j = 0; j < average.length; j++) {
+            average[j] = 0L;
+        }
+
+        for (IssueInfo issue : data) {
+            List<String> oneRow = new ArrayList<String>();
+            oneRow.add(issue.getIssueKey());
+            oneRow.add(issue.getIssueTitle());
+            for (int i = 0; i < transitions.size(); i++) {
+                List<Integer> timeSpend = issue.getTimeSpentOnTransition(transitions.get(i));
+                if (timeSpend.size() > 0) {
+                    average[i] += sum(timeSpend);
+                    StringBuilder builder = new StringBuilder();
+                    for (Integer eachItem : timeSpend) {
+                        builder.append("<p>").append(formatPeriod(Period.millis(eachItem))).append("</p>");
+                    }
+                    oneRow.add(builder.toString());
+                } else {
+                    oneRow.add("---");
+                }
+            }
+            result.add(oneRow);
+        }
+
+        return result;
+    }
+
     /**
      * Generating the HTML(String) Report
      */
@@ -115,6 +171,9 @@ public class ProductsReleaseWorkflowTimeStaticsReport extends AbstractReport {
 
         // Get all the deployed environment information
         List<WorkflowTransitions> transitionsList = getIdenticalTransitions(data);
+
+        List<List<String>> tableData = getTransitionDurationData(data, transitionsList);
+        log.error(tableData);
 
         // Pass the issues to the velocity template
         Map<String, Object> velocityParams = new HashMap<String, Object>();
@@ -173,7 +232,8 @@ public class ProductsReleaseWorkflowTimeStaticsReport extends AbstractReport {
                 ChangeHistoryManager historyManager = ComponentAccessor.getChangeHistoryManager();
 
                 IssueInfo info = new IssueInfo();
-                info.setIssueNo(issue.getId()).setIssueTitle(issue.getSummary()).setIssueKey(issue.getKey());
+                info.setIssueNo(issue.getId()).setIssueTitle(issue.getSummary()).setIssueKey(issue.getKey())
+                        .setIssueCreated(issue.getCreated());
 
                 info.setStatusChangeRcd(this.getFieldSortableChangeHistory(historyManager, issue, JIRA_FILED_STATUS));
 

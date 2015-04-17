@@ -142,9 +142,9 @@ public class ProductsReleaseWorkflowTimeStaticsReport extends AbstractReport {
 
     private List<List<String>> getTransitionDurationData(List<IssueInfo> data, List<WorkflowTransitions> transitions) {
         List<List<String>> result = new ArrayList<List<String>>();
-        Long[] average = new Long[transitions.size()];
-        for (int j = 0; j < average.length; j++) {
-            average[j] = 0L;
+        List<List<Integer>> average = new ArrayList<List<Integer>>();
+        for (int i = 0; i < transitions.size(); i++) {
+            average.add(new ArrayList<Integer>());
         }
 
         for (IssueInfo issue : data) {
@@ -154,7 +154,7 @@ public class ProductsReleaseWorkflowTimeStaticsReport extends AbstractReport {
             for (int i = 0; i < transitions.size(); i++) {
                 List<Integer> timeSpend = issue.getTimeSpentOnTransition(transitions.get(i));
                 if (timeSpend.size() > 0) {
-                    average[i] += sum(timeSpend);
+                    average.get(i).addAll(timeSpend);
                     StringBuilder builder = new StringBuilder();
                     for (Integer eachItem : timeSpend) {
                         builder.append("<p>").append(getDurationBreakdown(eachItem)).append("</p>");
@@ -167,6 +167,13 @@ public class ProductsReleaseWorkflowTimeStaticsReport extends AbstractReport {
             result.add(oneRow);
         }
 
+        List<String> oneRow = new ArrayList<String>();
+        oneRow.add("");
+        oneRow.add("");
+        for (int i = 0; i < transitions.size(); i++) {
+            oneRow.add(getDurationBreakdown(Math.round(sum(average.get(i)) / average.get(i).size())));
+        }
+        result.add(oneRow);
         return result;
     }
 

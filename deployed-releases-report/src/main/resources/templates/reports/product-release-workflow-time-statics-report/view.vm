@@ -36,19 +36,25 @@ Report Details:
         <th>Issue Id</th>
         <th>Title</th>        
         #foreach ($transition in $transitions)
-        <th>$transition.getFromStatus() - $transition.getToStatus()</th>
+        <th><p>$transition.getFromStatus()</p><p>$transition.getToStatus()</p></th>
         #end  
+    </tr>
+    <tr style="background: #EEEEEE;">
+        #foreach ($item in $summery.get(0))
+            <th>
+             $item
+            </th>
+        #end        
     </tr>
     #foreach ($rowdata in $tableData)
         <tr>
             #foreach ($item in $rowdata)
-            <td>
-             $item
-            </td>
+                <td>             
+                    $item        
+                </td>
             #end
         </tr>
     #end
-	</thead>	
-    
+	</thead>
 </table>
 </div>

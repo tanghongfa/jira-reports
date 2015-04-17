@@ -122,25 +122,27 @@ public class ProductsReleaseWorkflowTimeStaticsReport extends AbstractReport {
         StringBuilder sb = new StringBuilder(64);
         if (days > 0) {
             sb.append(days);
-            sb.append("D ");
+            sb.append("d");
         }
         if (hours > 0) {
             sb.append(hours);
-            sb.append("H ");
+            sb.append("h");
         }
         if (minutes > 0) {
             sb.append(minutes);
-            sb.append("M ");
+            sb.append("m");
         }
         if (seconds > 0) {
             sb.append(seconds);
-            sb.append("S");
+            sb.append("s");
         }
 
         return (sb.toString());
     }
 
     private List<List<String>> getTransitionDurationData(List<IssueInfo> data, List<WorkflowTransitions> transitions) {
+
+        String issueLink = "<a href=\"/jira/browse/#issueKey\">#issueKey</a>";
         List<List<String>> result = new ArrayList<List<String>>();
         List<List<Integer>> average = new ArrayList<List<Integer>>();
         for (int i = 0; i < transitions.size(); i++) {
@@ -149,16 +151,26 @@ public class ProductsReleaseWorkflowTimeStaticsReport extends AbstractReport {
 
         for (IssueInfo issue : data) {
             List<String> oneRow = new ArrayList<String>();
-            oneRow.add(issue.getIssueKey());
+            oneRow.add(issueLink.replaceAll("#issueKey", issue.getIssueKey()));
             oneRow.add(issue.getIssueTitle());
             for (int i = 0; i < transitions.size(); i++) {
                 List<Integer> timeSpend = issue.getTimeSpentOnTransition(transitions.get(i));
                 if (timeSpend.size() > 0) {
                     average.get(i).addAll(timeSpend);
+
                     StringBuilder builder = new StringBuilder();
-                    for (Integer eachItem : timeSpend) {
-                        builder.append("<p>").append(getDurationBreakdown(eachItem)).append("</p>");
+
+                    builder.append(getDurationBreakdown(Math.round(sum(timeSpend) / timeSpend.size())));
+
+                    if (timeSpend.size() > 1) {
+                        builder.append(" (").append(timeSpend.size()).append(")");
+                        builder.append("<span class=\"popover above\" style=\"display:none;\">");
+                        for (Integer eachItem : timeSpend) {
+                            builder.append("<p>").append(getDurationBreakdown(eachItem)).append("</p>");
+                        }
+                        builder.append("</span>");
                     }
+
                     oneRow.add(builder.toString());
                 } else {
                     oneRow.add("---");
@@ -169,7 +181,7 @@ public class ProductsReleaseWorkflowTimeStaticsReport extends AbstractReport {
 
         List<String> oneRow = new ArrayList<String>();
         oneRow.add("");
-        oneRow.add("");
+        oneRow.add("Average");
         for (int i = 0; i < transitions.size(); i++) {
             oneRow.add(getDurationBreakdown(Math.round(sum(average.get(i)) / average.get(i).size())));
         }
@@ -207,7 +219,8 @@ public class ProductsReleaseWorkflowTimeStaticsReport extends AbstractReport {
         velocityParams.put("projectName", projectManager.getProjectObj(projectId).getName());
         velocityParams.put("dateTimeFormatter", dateTimeFormatter.withStyle(DateTimeStyle.COMPLETE).forLoggedInUser());
         velocityParams.put("transitions", transitionsList);
-        velocityParams.put("tableData", tableData);
+        velocityParams.put("tableData", tableData.subList(0, tableData.size() - 1));
+        velocityParams.put("summery", tableData.subList(tableData.size() - 1, tableData.size()));
         velocityParams.put("issues", data);
         velocityParams.put("today", new Date());
 

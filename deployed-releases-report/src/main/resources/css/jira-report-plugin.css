@@ -127,3 +127,13 @@ button, input, optgroup, select, textarea {
     background-color: #ebebeb;
     text-decoration: none;
 }
+
+.table-report {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.aui-page-panel {
+    overflow: scroll;
+}

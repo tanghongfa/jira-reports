@@ -8,6 +8,47 @@ AJS.$(document).ready(function() {
 </script>
 #end
 
+<script type="text/javascript">
+window.onload = function () {
+    var chart = new CanvasJS.Chart("chartContainer",
+    {
+        title:{
+            text: "Desktop Search Engine Market Share, Dec-2012"
+        },
+                animationEnabled: true,
+        legend:{
+            verticalAlign: "center",
+            horizontalAlign: "left",
+            fontSize: 20,
+            fontFamily: "Helvetica"        
+        },
+        theme: "theme2",
+        data: [
+        {        
+            type: "pie",       
+            indexLabelFontFamily: "Garamond",       
+            indexLabelFontSize: 20,
+            indexLabel: "{label} {y}%",
+            startAngle:-20,      
+            showInLegend: true,
+            toolTipContent:"{legendText} {y}%",
+            dataPoints: [
+                {  y: 83.24, legendText:"Google", label: "Google" },
+                {  y: 8.16, legendText:"Yahoo!", label: "Yahoo!" },
+                {  y: 4.67, legendText:"Bing", label: "Bing" },
+                {  y: 1.67, legendText:"Baidu" , label: "Baidu"},       
+                {  y: 0.98, legendText:"Others" , label: "Others"}
+            ]
+        }
+        ]
+    });
+    chart.render();
+}
+</script>
+
+<div id="chartContainer" style="height: 300px; width: 100%;"></div>
+</body>
+
 #if($isExcel == true)
 <style>
 table, th, td {
@@ -38,16 +79,7 @@ Report Information:
 <div>   
    <table class="table-desc">
        <tr><td>Project Name:</td><td>$projectName</td></tr>
-       <tr><td>Time Period:</td><td>$dateTimeFormatter.format($startDate) - $dateTimeFormatter.format($endDate)</td></tr>
-       <tr><td>Result Set:</td>
-            <td>
-                #if($deploymentResult == "success")
-                    Success Deployments Only
-                #else
-                    All Deployments
-                #end
-            </td>
-       </tr>
+       <tr><td>Time Period:</td><td>$dateTimeFormatter.format($startDate) - $dateTimeFormatter.format($endDate)</td></tr>       
        <tr><td>Generated On:</td><td>$dateTimeFormatter.format($today)</td></tr>
    </table>
 </div>
@@ -91,13 +123,9 @@ Report Details:
             	#foreach ($env in $environments)
             	#set ($activity = false)
             	<td>
-                    #if($deploymentResult == "success")
-            		  #set ($activity = $issue.getLastSuccessDeploymentToEnv($env))
-            		#else
-            		  #set ($activity = $issue.getLastDeploymentToEnv($env))
-            		#end
+            	    #set ($activity = $issue.getLastSuccessDeploymentToEnv($env))            		
             		#if($activity)
-            	       $dateTimeFormatter.format($activity.getActionDate())
+            	       2s
             	    #else 
             	       ---
             		#end

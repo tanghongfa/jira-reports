@@ -105,4 +105,58 @@
          </property>          
    </properties>
   </report>
+  <report name="Proteus Successful vs Failed Deployments Report" i18n-name-key="success-vs-failed-deployments-report.name" key="success-vs-failed-deployments-report" class="com.atlassian.plugins.proteus.jira.reports.SuccessVsFailedDeploymentsReport">
+    <description key="success-vs-failed-deployments-report.description">This Proteus Report Plugin can generate reports to show how many releases are deployed for a specific product over a certain period</description>
+    <resource name="view" type="velocity" location="/templates/reports/success-vs-failed-deployments-report/view.vm"/>
+    <resource name="excel" type="velocity" location="/templates/reports/success-vs-failed-deployments-report/excel.vm" />
+    <resource name="i18n" type="i18n" location="SuccessVsFailedDeploymentsReport"/>
+    <label key="success-vs-failed-deployments-report.label"></label>
+    <properties>
+         <property>
+             <key>projectid</key>
+             <name>report.issuecreation.projectid.name</name>
+             <description>report.issuecreation.projectid.description</description>
+             <type>filterprojectpicker</type>
+         </property>
+         <property>
+             <key>startDate</key>
+             <name>report.issuecreation.startdate</name>
+             <description>report.issuecreation.startdate.description</description>
+             <type>date</type>
+         </property>
+         <property>
+             <key>endDate</key>
+             <name>report.issuecreation.enddate</name>
+             <description>report.issuecreation.enddate.description</description>
+             <type>date</type>
+         </property>          
+   </properties>
+  </report>
+  <report name="Proteus Product Release Deployment Duration Statics Report" i18n-name-key="deployment-duration-statics-report.name" key="deployment-duration-statics-report" class="com.atlassian.plugins.proteus.jira.reports.ProductsDeploymentDurationStaticsReport">
+    <description key="deployment-duration-statics-report.description">This Proteus Report Plugin can generate reports to show how many releases are deployed for a specific product over a certain period</description>
+    <resource name="view" type="velocity" location="/templates/reports/deployment-duration-statics-report/view.vm"/>
+    <resource name="excel" type="velocity" location="/templates/reports/deployment-duration-statics-report/excel.vm" />
+    <resource name="i18n" type="i18n" location="ProductsDeploymentDurationStaticsReport"/>
+    <label key="deployment-duration-statics-report.label"></label>
+    <properties>
+         <property>
+             <key>projectid</key>
+             <name>report.issuecreation.projectid.name</name>
+             <description>report.issuecreation.projectid.description</description>
+             <type>filterprojectpicker</type>
+         </property>
+         <property>
+             <key>startDate</key>
+             <name>report.issuecreation.startdate</name>
+             <description>report.issuecreation.startdate.description</description>
+             <type>date</type>
+         </property>
+         <property>
+             <key>endDate</key>
+             <name>report.issuecreation.enddate</name>
+             <description>report.issuecreation.enddate.description</description>
+             <type>date</type>
+         </property>          
+   </properties>
+  </report>
 </atlassian-plugin>

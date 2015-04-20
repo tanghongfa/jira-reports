@@ -1,0 +1,110 @@
+$webResourceManager.requireResourcesForContext("jira-report-plugin")
+
+#if($isExcel == false)
+<script>
+AJS.$(document).ready(function() {
+    AJS.$("#download-excel-link").attr("href", AJS.$(".excel a").attr("href"));
+});
+</script>
+#end
+
+#if($isExcel == true)
+<style>
+table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+    text-align: center;
+}
+</style>
+#end
+
+<div style="padding: 5px">
+
+#if($isExcel == true)
+<p style="font-size: 24px;">Proteus Deployed Product Releases Report</p>
+#end
+
+<!--Only include this Excel Download Link in Web Report-->
+#if($isExcel == false)
+<div style="height: 12px;">
+    <a id="download-excel-link" class="btn btn-default" href="#" role="button" style="float:right; clear:right;">Download Report as Excel</a>
+</div>
+#end
+
+<!-- Display the report configuration -->
+<div class="report-section-header">
+Report Information:
+</div>
+<div>   
+   <table class="table-desc">
+       <tr><td>Project Name:</td><td>$projectName</td></tr>
+       <tr><td>Time Period:</td><td>$dateTimeFormatter.format($startDate) - $dateTimeFormatter.format($endDate)</td></tr>
+       <tr><td>Result Set:</td>
+            <td>
+                #if($deploymentResult == "success")
+                    Success Deployments Only
+                #else
+                    All Deployments
+                #end
+            </td>
+       </tr>
+       <tr><td>Generated On:</td><td>$dateTimeFormatter.format($today)</td></tr>
+   </table>
+</div>
+<br />
+
+<!--Report Details section-->
+<div class="report-section-header">
+Report Details:
+</div>
+<table class="table table-striped table-report">
+    <thead>
+	<tr>
+        <th>Issue Id</th>
+        <th>Title</th>
+        <th>Component</th>
+        <th>Version</th>
+        #foreach ($env in $environments)
+        <th>$env</th>
+        #end  
+    </tr>
+	</thead>	
+    #foreach ($issue in $issues)
+        #if($issue.isEverDeployed())
+            <tr>
+            	<td>
+            		<a href="/jira/browse/$issue.getIssueKey()">$issue.getIssueKey()</a>
+            	</td>    	
+            	<td>
+            		$issue.getIssueTitle()
+            	</td> 
+            	<td>
+            	    #foreach ($comp in $issue.getDeployedComponent())
+            	    <p>$comp</p>
+            	    #end            		
+            	</td>
+            	<td>
+            		#foreach ($compVer in $issue.getDeployedVersion())
+                    <p>$compVer</p>
+                    #end  
+            	</td>
+            	#foreach ($env in $environments)
+            	#set ($activity = false)
+            	<td>
+                    #if($deploymentResult == "success")
+            		  #set ($activity = $issue.getLastSuccessDeploymentToEnv($env))
+            		#else
+            		  #set ($activity = $issue.getLastDeploymentToEnv($env))
+            		#end
+            		#if($activity)
+            	       $dateTimeFormatter.format($activity.getActionDate())
+            	    #else 
+            	       ---
+            		#end
+            	</td>
+            	#end      
+            </tr>
+        #end
+    #end
+</table>
+</div>

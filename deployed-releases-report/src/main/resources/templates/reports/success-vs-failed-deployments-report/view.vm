@@ -76,7 +76,7 @@ Report Information:
 <div>   
    <table class="table-desc">
        <tr><td>Project Name:</td><td id="td-project-name">$projectName</td></tr>
-       <tr><td>Time Period:</td><td>$dateTimeFormatter.format($startDate) - $dateTimeFormatter.format($endDate)</td></tr>       
+       <tr><td>Time Period:</td><td>$dateFormatter.format($startDate) - $dateFormatter.format($endDate)</td></tr>       
        <tr><td>Generated On:</td><td>$dateTimeFormatter.format($today)</td></tr>
    </table>
 </div>

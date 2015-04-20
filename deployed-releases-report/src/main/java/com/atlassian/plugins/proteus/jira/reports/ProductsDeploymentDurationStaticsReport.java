@@ -45,6 +45,8 @@ public class ProductsDeploymentDurationStaticsReport extends AbstractReport {
 
     private final static String JIRA_CUSTOM_FILED_DEPLOYMENT_TRACKER = "_deployment_tracker";
 
+    private final static int ONE_DAY_IN_MILLIONS = 1 * 24 * 60 * 60 * 1000;
+
     /**
      * Creates a new instance of
      * <code>ProductsDeploymentDurationStaticsReport</code>.
@@ -122,7 +124,8 @@ public class ProductsDeploymentDurationStaticsReport extends AbstractReport {
                 .parse((String) params.get("endDate"));
 
         // Load all the required data
-        List<IssueInfo> data = loadIssueData(startDate, endDate, remoteUser, projectId);
+        List<IssueInfo> data = loadIssueData(startDate, new Date(endDate.getTime() + ONE_DAY_IN_MILLIONS), remoteUser,
+                projectId);
         Collections.sort(data);
 
         // Get all the deployed environment information
@@ -139,6 +142,7 @@ public class ProductsDeploymentDurationStaticsReport extends AbstractReport {
         velocityParams.put("endDate", endDate);
         velocityParams.put("deploymentResult", params.get("deploymentResult"));
         velocityParams.put("projectName", projectManager.getProjectObj(projectId).getName());
+        velocityParams.put("dateFormatter", dateTimeFormatter.withStyle(DateTimeStyle.DATE_PICKER).forLoggedInUser());
         velocityParams.put("dateTimeFormatter", dateTimeFormatter.withStyle(DateTimeStyle.COMPLETE).forLoggedInUser());
         velocityParams.put("environments", envList);
         velocityParams.put("issues", data);

@@ -9,12 +9,12 @@ AJS.$(document).ready(function() {
 #end
 
 <script type="text/javascript">
-//var chartTitle = "Success vs Failed Deployments for project - " + AJS.("#td-project-name").text();
+var chartTitle = "Success vs Failed Deployments for $projectName";
 window.onload = function () {
     var chart = new CanvasJS.Chart("chartContainer",
     {
         title:{
-            text: "Success vs Failed Deployments for Test Project"
+            text: chartTitle
         },
         animationEnabled: true,
         legend:{

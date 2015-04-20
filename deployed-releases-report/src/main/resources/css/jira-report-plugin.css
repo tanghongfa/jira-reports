@@ -137,3 +137,6 @@ button, input, optgroup, select, textarea {
 .aui-page-panel {
     overflow: scroll;
 }
+.canvasjs-chart-credit {
+    display:none;
+}

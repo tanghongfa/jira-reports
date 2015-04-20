@@ -9,13 +9,14 @@ AJS.$(document).ready(function() {
 #end
 
 <script type="text/javascript">
+//var chartTitle = "Success vs Failed Deployments for project - " + AJS.("#td-project-name").text();
 window.onload = function () {
     var chart = new CanvasJS.Chart("chartContainer",
     {
         title:{
-            text: "Desktop Search Engine Market Share, Dec-2012"
+            text: "Success vs Failed Deployments for Test Project"
         },
-                animationEnabled: true,
+        animationEnabled: true,
         legend:{
             verticalAlign: "center",
             horizontalAlign: "left",
@@ -28,16 +29,13 @@ window.onload = function () {
             type: "pie",       
             indexLabelFontFamily: "Garamond",       
             indexLabelFontSize: 20,
-            indexLabel: "{label} {y}%",
+            indexLabel: "{label} ({quantity}) {y}%",
             startAngle:-20,      
             showInLegend: true,
             toolTipContent:"{legendText} {y}%",
             dataPoints: [
-                {  y: 83.24, legendText:"Google", label: "Google" },
-                {  y: 8.16, legendText:"Yahoo!", label: "Yahoo!" },
-                {  y: 4.67, legendText:"Bing", label: "Bing" },
-                {  y: 1.67, legendText:"Baidu" , label: "Baidu"},       
-                {  y: 0.98, legendText:"Others" , label: "Others"}
+                {  y: 80, legendText:"Successful", label: "Successful", quantity: 160 },
+                {  y: 20, legendText:"Failed", label: "Failed", quantity: 40 }
             ]
         }
         ]
@@ -46,8 +44,7 @@ window.onload = function () {
 }
 </script>
 
-<div id="chartContainer" style="height: 300px; width: 100%;"></div>
-</body>
+
 
 #if($isExcel == true)
 <style>
@@ -78,7 +75,7 @@ Report Information:
 </div>
 <div>   
    <table class="table-desc">
-       <tr><td>Project Name:</td><td>$projectName</td></tr>
+       <tr><td>Project Name:</td><td id="td-project-name">$projectName</td></tr>
        <tr><td>Time Period:</td><td>$dateTimeFormatter.format($startDate) - $dateTimeFormatter.format($endDate)</td></tr>       
        <tr><td>Generated On:</td><td>$dateTimeFormatter.format($today)</td></tr>
    </table>
@@ -89,50 +86,6 @@ Report Information:
 <div class="report-section-header">
 Report Details:
 </div>
-<table class="table table-striped table-report">
-    <thead>
-	<tr>
-        <th>Issue Id</th>
-        <th>Title</th>
-        <th>Component</th>
-        <th>Version</th>
-        #foreach ($env in $environments)
-        <th>$env</th>
-        #end  
-    </tr>
-	</thead>	
-    #foreach ($issue in $issues)
-        #if($issue.isEverDeployed())
-            <tr>
-            	<td>
-            		<a href="/jira/browse/$issue.getIssueKey()">$issue.getIssueKey()</a>
-            	</td>    	
-            	<td>
-            		$issue.getIssueTitle()
-            	</td> 
-            	<td>
-            	    #foreach ($comp in $issue.getDeployedComponent())
-            	    <p>$comp</p>
-            	    #end            		
-            	</td>
-            	<td>
-            		#foreach ($compVer in $issue.getDeployedVersion())
-                    <p>$compVer</p>
-                    #end  
-            	</td>
-            	#foreach ($env in $environments)
-            	#set ($activity = false)
-            	<td>
-            	    #set ($activity = $issue.getLastSuccessDeploymentToEnv($env))            		
-            		#if($activity)
-            	       2s
-            	    #else 
-            	       ---
-            		#end
-            	</td>
-            	#end      
-            </tr>
-        #end
-    #end
-</table>
+<div id="chartContainer" style="height: 300px; width: 100%;"></div>
+</body>
 </div>

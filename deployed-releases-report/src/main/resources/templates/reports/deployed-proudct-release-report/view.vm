@@ -71,6 +71,13 @@ Report Details:
 	</thead>	
     #foreach ($issue in $issues)
         #if($issue.isEverDeployed())
+            #set($activityMap = false)
+            #if($deploymentResult == "success")           
+                #set($activityMap = $issue.getLastSuccessDeploymentToEnvironments($environments))
+            #else 
+                #set($activityMap = $issue.getLastDeploymentToEnvironments($environments))
+            #end
+            #if($activityMap.size() > 0) 
             <tr>
             	<td>
             		<a href="/jira/browse/$issue.getIssueKey()">$issue.getIssueKey()</a>
@@ -88,22 +95,19 @@ Report Details:
                     <p>$compVer</p>
                     #end  
             	</td>
-            	#foreach ($env in $environments)
-            	#set ($activity = false)
-            	<td>
-                    #if($deploymentResult == "success")
-            		  #set ($activity = $issue.getLastSuccessDeploymentToEnv($env))
-            		#else
-            		  #set ($activity = $issue.getLastDeploymentToEnv($env))
-            		#end
-            		#if($activity)
-            	       $dateTimeFormatter.format($activity.getActionDate())
-            	    #else 
-            	       ---
-            		#end
-            	</td>
-            	#end      
+            	   #foreach ($env in $environments)
+                        #set ($activity = false)
+                        <td>
+                            #set ($activity = $activityMap.get($env))
+                            #if($activity)
+                               $dateTimeFormatter.format($activity.getActionDate())
+                            #else 
+                               ---
+                            #end
+                        </td>
+                   #end
             </tr>
+            #end
         #end
     #end
 </table>

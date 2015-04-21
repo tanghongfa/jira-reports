@@ -3,8 +3,10 @@ package com.atlassian.plugins.proteus.jira.issue.view.util;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -256,6 +258,17 @@ public class IssueInfo implements Comparable<IssueInfo> {
         return null;
     }
 
+    public Map<String, DeploymentActivityRecord> getLastDeploymentToEnvironments(List<String> environmentLst) {
+        Map<String, DeploymentActivityRecord> result = new HashMap<String, DeploymentActivityRecord>();
+        for (String env : environmentLst) {
+            DeploymentActivityRecord rcd = getLastDeploymentToEnv(env);
+            if (rcd != null) {
+                result.put(env, rcd);
+            }
+        }
+        return result;
+    }
+
     /**
      * This function is to find the last successful deployment to an
      * env. It has been taking consideration of the following
@@ -297,6 +310,17 @@ public class IssueInfo implements Comparable<IssueInfo> {
         }
 
         return null;
+    }
+
+    public Map<String, DeploymentActivityRecord> getLastSuccessDeploymentToEnvironments(List<String> environmentLst) {
+        Map<String, DeploymentActivityRecord> result = new HashMap<String, DeploymentActivityRecord>();
+        for (String env : environmentLst) {
+            DeploymentActivityRecord rcd = getLastSuccessDeploymentToEnv(env);
+            if (rcd != null) {
+                result.put(env, rcd);
+            }
+        }
+        return result;
     }
 
     private SortableChangeHistoryItem getItemBefore(List<SortableChangeHistoryItem> itemLst, Timestamp timestamp) {

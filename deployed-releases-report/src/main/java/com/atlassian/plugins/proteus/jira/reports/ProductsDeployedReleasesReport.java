@@ -4,10 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -23,6 +21,7 @@ import com.atlassian.jira.issue.search.SearchProvider;
 import com.atlassian.jira.issue.statistics.util.FieldableDocumentHitCollector;
 import com.atlassian.jira.jql.builder.JqlQueryBuilder;
 import com.atlassian.jira.plugin.report.impl.AbstractReport;
+import com.atlassian.jira.project.Project;
 import com.atlassian.jira.project.ProjectManager;
 import com.atlassian.jira.user.ApplicationUser;
 import com.atlassian.jira.util.ParameterUtils;
@@ -31,6 +30,7 @@ import com.atlassian.jira.web.bean.PagerFilter;
 import com.atlassian.plugins.proteus.jira.issue.view.util.DeploymentActivityRecord;
 import com.atlassian.plugins.proteus.jira.issue.view.util.IssueInfo;
 import com.atlassian.plugins.proteus.jira.issue.view.util.IssueInfoMapperHitCollector;
+import com.atlassian.plugins.proteus.jira.issue.view.util.JiraReportUtils;
 import com.atlassian.query.Query;
 
 /**
@@ -78,8 +78,13 @@ public class ProductsDeployedReleasesReport extends AbstractReport {
      */
     private List<IssueInfo> loadIssueData(Date startDate, Date endDate, ApplicationUser remoteUser, Long projectId)
             throws SearchException {
+
+        Project project = projectManager.getProjectObj(projectId);
+        List<String> releaseIssueTypes = JiraReportUtils.getProjectReleaseIssueTypes(project);
+
         JqlQueryBuilder queryBuilder = JqlQueryBuilder.newBuilder();
-        Query query = queryBuilder.where().createdBetween(startDate, endDate).and().project(projectId).buildQuery();
+        Query query = queryBuilder.where().createdBetween(startDate, endDate).and().project(projectId).and()
+                .issueType(releaseIssueTypes.toArray(new String[0])).buildQuery();
 
         List<IssueInfo> data = new ArrayList<IssueInfo>();
 
@@ -129,12 +134,7 @@ public class ProductsDeployedReleasesReport extends AbstractReport {
         Collections.sort(data);
 
         // Get all the deployed environment information
-        Set<String> deployedEnvironments = new HashSet<String>();
-        for (int i = 0; i < data.size(); i++) {
-            deployedEnvironments.addAll(data.get(i).getDeployedEnvironments());
-        }
-        List<String> envList = new ArrayList<String>(deployedEnvironments);
-        Collections.sort(envList);
+        List<String> envList = JiraReportUtils.getDeployedEnvironments(projectManager.getProjectObj(projectId));
 
         // Pass the issues to the velocity template
         Map<String, Object> velocityParams = new HashMap<String, Object>();

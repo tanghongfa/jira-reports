@@ -4,11 +4,9 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -362,16 +360,16 @@ public class IssueInfo implements Comparable<IssueInfo> {
         return null;
     }
 
-    /**
-     * @return Set<String>
-     */
-    public Set<String> getDeployedEnvironments() {
-        Set<String> envHash = new HashSet<String>();
-        for (int i = 0; i < activityRcd.size(); i++) {
-            envHash.add(activityRcd.get(i).getEnvironment());
-        }
-        return envHash;
-    }
+    //    /**
+    //     * @return Set<String>
+    //     */
+    //    public Set<String> getDeployedEnvironments() {
+    //        Set<String> envHash = new HashSet<String>();
+    //        for (int i = 0; i < activityRcd.size(); i++) {
+    //            envHash.add(activityRcd.get(i).getEnvironment());
+    //        }
+    //        return envHash;
+    //    }
 
     /**
      * @return boolean

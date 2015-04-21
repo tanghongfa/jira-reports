@@ -4,10 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -31,6 +29,7 @@ import com.atlassian.jira.web.bean.PagerFilter;
 import com.atlassian.plugins.proteus.jira.issue.view.util.DeploymentActivityRecord;
 import com.atlassian.plugins.proteus.jira.issue.view.util.IssueInfo;
 import com.atlassian.plugins.proteus.jira.issue.view.util.IssueInfoMapperHitCollector;
+import com.atlassian.plugins.proteus.jira.issue.view.util.JiraReportUtils;
 import com.atlassian.query.Query;
 
 /**
@@ -129,12 +128,7 @@ public class SuccessVsFailedDeploymentsReport extends AbstractReport {
         Collections.sort(data);
 
         // Get all the deployed environment information
-        Set<String> deployedEnvironments = new HashSet<String>();
-        for (int i = 0; i < data.size(); i++) {
-            deployedEnvironments.addAll(data.get(i).getDeployedEnvironments());
-        }
-        List<String> envList = new ArrayList<String>(deployedEnvironments);
-        Collections.sort(envList);
+        List<String> envList = JiraReportUtils.getDeployedEnvironments(projectManager.getProjectObj(projectId));
 
         // Pass the issues to the velocity template
         Map<String, Object> velocityParams = new HashMap<String, Object>();

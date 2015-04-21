@@ -48,6 +48,23 @@ public class JiraReportUtils {
         return "DVN2 Environment";
     }
 
+    public static String getDeployEnvironmentCustomFieldName(List<String> issueTypes) {
+        //        try {
+        //            //TODO: fix up this part later on ... read up the configuration file and get the configuration for it
+        //            //            String content = new Scanner(new File("filename")).useDelimiter("\\Z").next();
+        //            //            JSONObject obj = new JSONObject(content);
+        //
+        //            return "DVN2 Environment";
+        //
+        //        } catch (Exception e) {
+        //            // TODO Auto-generated catch block
+        //            e.printStackTrace();
+        //        }
+        //        return null;
+
+        return "DVN2 Environment";
+    }
+
     /**
      * @param customFieldName
      * @return List<String>

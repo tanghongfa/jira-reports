@@ -9,6 +9,7 @@
  *----------------------------------------------------------------------------*/
 package com.atlassian.plugins.proteus.jira.reports;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -135,18 +136,20 @@ public class ProductsReleaseWorkflowTimeStaticsReport extends AbstractReport {
         for (IssueWorkflowTransitionRcd item : averageData) {
             sumLst.add(item.getAverageTime());
         }
-        Integer total = JiraReportUtils.sum(sumLst);
+        double total = JiraReportUtils.sum(sumLst);
 
         IssueWorkflowTransitionRcd[] sortedAverageData = averageData.toArray(new IssueWorkflowTransitionRcd[0]);
         Arrays.sort(sortedAverageData, IssueWorkflowTransitionRcd.TransitionAverageSpentTimeComparator);
 
-        int totalPerc = 100;
-        int controlLevel = 100 - level;
+        DecimalFormat df = new DecimalFormat("#.00");
+
+        double totalPerc = 100;
+        double controlLevel = 100 - level;
         for (int i = 0; (totalPerc >= controlLevel) && (i < sortedAverageData.length); i++) {
             List<Object> oneRow = new ArrayList<Object>();
-            int percetage = Math.round((sortedAverageData[i].getAverageTime() * 100) / total);
+            double percetage = ((double) sortedAverageData[i].getAverageTime() * 100) / total;
             totalPerc -= percetage;
-            oneRow.add(percetage);
+            oneRow.add(df.format(percetage));
             oneRow.add(sortedAverageData[i].getFromStatus() + " - " + sortedAverageData[i].getToStatus());
             oneRow.add(sortedAverageData[i].getFromStatus() + " - " + sortedAverageData[i].getToStatus());
             oneRow.add(sortedAverageData[i].getFormattedDuration());
@@ -155,7 +158,7 @@ public class ProductsReleaseWorkflowTimeStaticsReport extends AbstractReport {
 
         if (totalPerc > 0) {
             List<Object> oneRow = new ArrayList<Object>();
-            oneRow.add(totalPerc);
+            oneRow.add(df.format(totalPerc));
             oneRow.add("Others");
             oneRow.add("Others");
             oneRow.add("");

@@ -128,7 +128,7 @@ public class ProductsReleaseWorkflowTimeStaticsReport extends AbstractReport {
     private List<List<Object>> getTopTimeConsumingTransitionPieChartInfo(List<IssueWorkflowTransitionRcd> averageData,
             int level) {
         //each of the row in the list will contain 
-        // Percentage(int) legendText(String) label(String) quantity(String)
+        // Percentage(double) legendText(String) label(String) quantity(String)
 
         List<List<Object>> result = new ArrayList<List<Object>>();
 
@@ -196,8 +196,6 @@ public class ProductsReleaseWorkflowTimeStaticsReport extends AbstractReport {
 
         //Get the top 10 time consuming items
         List<List<Object>> pieChartData = getTopTimeConsumingTransitionPieChartInfo(averageData, 90);
-
-        //List<IssueWorkflowTransitionRcd> topTimeConsumingTransitions = Arrays.asList(sortedAverageData).subList(ONE_DAY_IN_MILLIONS, ONE_DAY_IN_MILLIONS);
 
         // Pass the issues to the velocity template
         Map<String, Object> velocityParams = new HashMap<String, Object>();

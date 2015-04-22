@@ -10,6 +10,12 @@ AJS.$(document).ready(function() {
 
 <script type="text/javascript">
 var chartTitle = "Success vs Failed Deployments for $projectName";
+var dataPoints = [];
+
+#foreach ($row in $pieChartData)
+    dataPoints.push({y: $row.get(0), legendText: "$row.get(1)", label: "$row.get(2)", quantity: "$row.get(3)"});
+#end
+
 window.onload = function () {
     var chart = new CanvasJS.Chart("chartContainer",
     {
@@ -33,10 +39,7 @@ window.onload = function () {
             startAngle:-20,      
             showInLegend: true,
             toolTipContent:"{legendText} {y}%",
-            dataPoints: [
-                {  y: 80, legendText:"Successful", label: "Successful", quantity: 160 },
-                {  y: 20, legendText:"Failed", label: "Failed", quantity: 40 }
-            ]
+            dataPoints: dataPoints
         }
         ]
     });

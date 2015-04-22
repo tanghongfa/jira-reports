@@ -1,7 +1,7 @@
 package com.atlassian.plugins.proteus.jira.reports;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -29,7 +29,6 @@ import com.atlassian.jira.web.bean.PagerFilter;
 import com.atlassian.plugins.proteus.jira.issue.view.util.DeploymentActivityRecord;
 import com.atlassian.plugins.proteus.jira.issue.view.util.IssueInfo;
 import com.atlassian.plugins.proteus.jira.issue.view.util.IssueInfoMapperHitCollector;
-import com.atlassian.plugins.proteus.jira.issue.view.util.JiraReportUtils;
 import com.atlassian.query.Query;
 
 /**
@@ -112,6 +111,42 @@ public class SuccessVsFailedDeploymentsReport extends AbstractReport {
 
     }
 
+    private List<List<Object>> getSuccessVsFailedDeploymentPieChartInfo(List<IssueInfo> data) {
+        //each of the row in the list will contain 
+        // Percentage(double) legendText(String) label(String) quantity(String)
+
+        List<List<Object>> result = new ArrayList<List<Object>>();
+
+        int successfulCounts = 0;
+        int failedCounts = 0;
+        for (int i = 0; i < data.size(); i++) {
+            IssueInfo issue = data.get(i);
+            successfulCounts += issue.countSuccessDeployments();
+            failedCounts += issue.countSuccessDeployments();
+        }
+
+        double successPercentage = ((double) successfulCounts * 100) / ((double) successfulCounts + failedCounts);
+        double failedPercentage = 100 - successPercentage;
+
+        DecimalFormat df = new DecimalFormat("#.00");
+
+        List<Object> oneRow = new ArrayList<Object>();
+        oneRow.add(df.format(successPercentage));
+        oneRow.add("Successful");
+        oneRow.add("Successful");
+        oneRow.add(Integer.toString(successfulCounts));
+        result.add(oneRow);
+
+        oneRow = new ArrayList<Object>();
+        oneRow.add(df.format(failedPercentage));
+        oneRow.add("Failure");
+        oneRow.add("Failure");
+        oneRow.add(Integer.toString(failedCounts));
+        result.add(oneRow);
+
+        return result;
+    }
+
     private String generateReportHtml(ProjectActionSupport action, Map params, String view, boolean isExcel)
             throws Exception {
         ApplicationUser remoteUser = action.getLoggedInApplicationUser();
@@ -125,10 +160,8 @@ public class SuccessVsFailedDeploymentsReport extends AbstractReport {
         // Load all the required data
         List<IssueInfo> data = loadIssueData(startDate, new Date(endDate.getTime() + ONE_DAY_IN_MILLIONS), remoteUser,
                 projectId);
-        Collections.sort(data);
 
-        // Get all the deployed environment information
-        List<String> envList = JiraReportUtils.getDeployedEnvironments(projectManager.getProjectObj(projectId));
+        List<List<Object>> pieChartData = getSuccessVsFailedDeploymentPieChartInfo(data);
 
         // Pass the issues to the velocity template
         Map<String, Object> velocityParams = new HashMap<String, Object>();
@@ -138,8 +171,7 @@ public class SuccessVsFailedDeploymentsReport extends AbstractReport {
         velocityParams.put("projectName", projectManager.getProjectObj(projectId).getName());
         velocityParams.put("dateFormatter", dateTimeFormatter.withStyle(DateTimeStyle.DATE_PICKER).forLoggedInUser());
         velocityParams.put("dateTimeFormatter", dateTimeFormatter.withStyle(DateTimeStyle.COMPLETE).forLoggedInUser());
-        velocityParams.put("environments", envList);
-        velocityParams.put("issues", data);
+        velocityParams.put("pieChartData", pieChartData);
         velocityParams.put("today", new Date());
         velocityParams.put("isExcel", isExcel);
 

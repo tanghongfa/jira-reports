@@ -283,7 +283,6 @@ public class IssueInfo implements Comparable<IssueInfo> {
      * @return DeploymentActivityRecord
      */
     public DeploymentActivityRecord getLastSuccessDeploymentToEnv(String environment) {
-        log.error(activityRcd);
         boolean gotLastSuccessDeployToEnvRcd = false;
         for (int i = 0; i < activityRcd.size(); i++) {
             DeploymentActivityRecord activity = activityRcd.get(i);
@@ -319,6 +318,36 @@ public class IssueInfo implements Comparable<IssueInfo> {
             }
         }
         return result;
+    }
+
+    public int countSuccessDeployments() {
+        if (activityRcd == null) {
+            return 0;
+        }
+
+        int count = 0;
+        for (int i = 0; i < activityRcd.size(); i++) {
+            DeploymentActivityRecord activity = activityRcd.get(i);
+            if (activity.getAction().equalsIgnoreCase(DeploymentActivityRecord.ACTION_TYPE_SUCCESS_DEPLOYED)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    public int countFailedDeployments() {
+        if (activityRcd == null) {
+            return 0;
+        }
+
+        int count = 0;
+        for (int i = 0; i < activityRcd.size(); i++) {
+            DeploymentActivityRecord activity = activityRcd.get(i);
+            if (activity.getAction().equalsIgnoreCase(DeploymentActivityRecord.ACTION_TYPE_FAIL_DEPLOYED)) {
+                count++;
+            }
+        }
+        return count;
     }
 
     private SortableChangeHistoryItem getItemBefore(List<SortableChangeHistoryItem> itemLst, Timestamp timestamp) {
@@ -359,17 +388,6 @@ public class IssueInfo implements Comparable<IssueInfo> {
 
         return null;
     }
-
-    //    /**
-    //     * @return Set<String>
-    //     */
-    //    public Set<String> getDeployedEnvironments() {
-    //        Set<String> envHash = new HashSet<String>();
-    //        for (int i = 0; i < activityRcd.size(); i++) {
-    //            envHash.add(activityRcd.get(i).getEnvironment());
-    //        }
-    //        return envHash;
-    //    }
 
     /**
      * @return boolean

@@ -260,7 +260,9 @@ public class ProductsReleaseWorkflowTimeStaticsReport extends AbstractReport {
 
                 info.setStatusChangeRcd(this.getFieldSortableChangeHistory(historyManager, issue, JIRA_FILED_STATUS));
 
-                result.add(info);
+                if (info.isEverChangedStatus()) {
+                    result.add(info);
+                }
             }
 
         };

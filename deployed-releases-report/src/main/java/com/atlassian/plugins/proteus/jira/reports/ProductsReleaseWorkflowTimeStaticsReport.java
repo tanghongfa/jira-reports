@@ -39,6 +39,7 @@ import com.atlassian.jira.web.bean.PagerFilter;
 import com.atlassian.plugins.proteus.jira.issue.view.util.IssueInfo;
 import com.atlassian.plugins.proteus.jira.issue.view.util.IssueInfoMapperHitCollector;
 import com.atlassian.plugins.proteus.jira.issue.view.util.IssueWorkflowTransitionRcd;
+import com.atlassian.plugins.proteus.jira.issue.view.util.JiraReportUtils;
 import com.atlassian.plugins.proteus.jira.issue.view.util.SortableChangeHistoryItem;
 import com.atlassian.plugins.proteus.jira.issue.view.util.WorkflowTransitions;
 import com.atlassian.query.Query;
@@ -123,6 +124,47 @@ public class ProductsReleaseWorkflowTimeStaticsReport extends AbstractReport {
         return result;
     }
 
+    private List<List<Object>> getTopTimeConsumingTransitionPieChartInfo(List<IssueWorkflowTransitionRcd> averageData,
+            int level) {
+        //each of the row in the list will contain 
+        // Percentage(int) legendText(String) label(String) quantity(String)
+
+        List<List<Object>> result = new ArrayList<List<Object>>();
+
+        List<Integer> sumLst = new ArrayList<Integer>();
+        for (IssueWorkflowTransitionRcd item : averageData) {
+            sumLst.add(item.getAverageTime());
+        }
+        Integer total = JiraReportUtils.sum(sumLst);
+
+        IssueWorkflowTransitionRcd[] sortedAverageData = averageData.toArray(new IssueWorkflowTransitionRcd[0]);
+        Arrays.sort(sortedAverageData, IssueWorkflowTransitionRcd.TransitionAverageSpentTimeComparator);
+
+        int totalPerc = 100;
+        int controlLevel = 100 - level;
+        for (int i = 0; (totalPerc >= controlLevel) && (i < sortedAverageData.length); i++) {
+            List<Object> oneRow = new ArrayList<Object>();
+            int percetage = Math.round((sortedAverageData[i].getAverageTime() * 100) / total);
+            totalPerc -= percetage;
+            oneRow.add(percetage);
+            oneRow.add(sortedAverageData[i].getFromStatus() + " - " + sortedAverageData[i].getToStatus());
+            oneRow.add(sortedAverageData[i].getFromStatus() + " - " + sortedAverageData[i].getToStatus());
+            oneRow.add(sortedAverageData[i].getFormattedDuration());
+            result.add(oneRow);
+        }
+
+        if (totalPerc > 0) {
+            List<Object> oneRow = new ArrayList<Object>();
+            oneRow.add(totalPerc);
+            oneRow.add("Others");
+            oneRow.add("Others");
+            oneRow.add("");
+            result.add(oneRow);
+        }
+
+        return result;
+    }
+
     /**
      * Generating the HTML(String) Report
      */
@@ -150,8 +192,8 @@ public class ProductsReleaseWorkflowTimeStaticsReport extends AbstractReport {
         List<List<IssueWorkflowTransitionRcd>> issueRelatedData = tableData.subList(1, tableData.size());
 
         //Get the top 10 time consuming items
-        IssueWorkflowTransitionRcd[] sortedAverageData = averageData.toArray(new IssueWorkflowTransitionRcd[0]);
-        Arrays.sort(sortedAverageData, IssueWorkflowTransitionRcd.TransitionAverageSpentTimeComparator);
+        List<List<Object>> pieChartData = getTopTimeConsumingTransitionPieChartInfo(averageData, 90);
+
         //List<IssueWorkflowTransitionRcd> topTimeConsumingTransitions = Arrays.asList(sortedAverageData).subList(ONE_DAY_IN_MILLIONS, ONE_DAY_IN_MILLIONS);
 
         // Pass the issues to the velocity template
@@ -164,6 +206,7 @@ public class ProductsReleaseWorkflowTimeStaticsReport extends AbstractReport {
         velocityParams.put("dateTimeFormatter", dateTimeFormatter.withStyle(DateTimeStyle.COMPLETE).forLoggedInUser());
         velocityParams.put("transitions", transitionsList);
         velocityParams.put("tableData", issueRelatedData);
+        velocityParams.put("pieChartData", pieChartData);
         velocityParams.put("summery", averageData);
         velocityParams.put("issues", data);
         velocityParams.put("today", new Date());
@@ -203,9 +246,6 @@ public class ProductsReleaseWorkflowTimeStaticsReport extends AbstractReport {
                 for (ChangeItemBean change : changes) {
                     changeRcd.add(new SortableChangeHistoryItem(change));
                 }
-
-                log.error(changeRcd);
-
                 return changeRcd;
             }
 

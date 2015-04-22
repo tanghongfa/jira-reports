@@ -16,6 +16,10 @@ public class DeploymentActivityRecord implements Comparable<DeploymentActivityRe
      */
     public static final String ACTION_TYPE_START_DEPLOY = "start_deploy";
     /**
+     * TODO javadoc for <code>ACTION_TYPE_FINISHED_DEPLOY</code>
+     */
+    public static final String ACTION_TYPE_FINISHED_DEPLOY = "finished_deploy";
+    /**
      * TODO javadoc for <code>ACTION_TYPE_START_ROLLBACK</code>
      */
     public static final String ACTION_TYPE_START_ROLLBACK = "start_rollback";

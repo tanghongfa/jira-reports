@@ -122,7 +122,7 @@ public class SuccessVsFailedDeploymentsReport extends AbstractReport {
         for (int i = 0; i < data.size(); i++) {
             IssueInfo issue = data.get(i);
             successfulCounts += issue.countSuccessDeployments();
-            failedCounts += issue.countSuccessDeployments();
+            failedCounts += issue.countFailedDeployments();
         }
 
         double successPercentage = ((double) successfulCounts * 100) / ((double) successfulCounts + failedCounts);

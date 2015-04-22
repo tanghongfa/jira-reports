@@ -16,7 +16,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -39,6 +38,7 @@ import com.atlassian.jira.web.action.ProjectActionSupport;
 import com.atlassian.jira.web.bean.PagerFilter;
 import com.atlassian.plugins.proteus.jira.issue.view.util.IssueInfo;
 import com.atlassian.plugins.proteus.jira.issue.view.util.IssueInfoMapperHitCollector;
+import com.atlassian.plugins.proteus.jira.issue.view.util.IssueWorkflowTransitionRcd;
 import com.atlassian.plugins.proteus.jira.issue.view.util.SortableChangeHistoryItem;
 import com.atlassian.plugins.proteus.jira.issue.view.util.WorkflowTransitions;
 import com.atlassian.query.Query;
@@ -99,95 +99,27 @@ public class ProductsReleaseWorkflowTimeStaticsReport extends AbstractReport {
         return result;
     }
 
-    private Integer sum(List<Integer> list) {
-        Integer result = 0;
-        for (Integer it : list) {
-            result += it;
-        }
-        return result;
-    }
+    private List<List<IssueWorkflowTransitionRcd>> getTransitionDurationData(List<IssueInfo> data,
+            List<WorkflowTransitions> transitions) {
 
-    private String getDurationBreakdown(long millis) {
-        long time = millis;
-        if (time < 0) {
-            throw new IllegalArgumentException("Duration must be greater than zero!");
-        }
+        List<List<IssueWorkflowTransitionRcd>> result = new ArrayList<List<IssueWorkflowTransitionRcd>>();
 
-        long days = TimeUnit.MILLISECONDS.toDays(time);
-        time -= TimeUnit.DAYS.toMillis(days);
-        long hours = TimeUnit.MILLISECONDS.toHours(time);
-        time -= TimeUnit.HOURS.toMillis(hours);
-        long minutes = TimeUnit.MILLISECONDS.toMinutes(time);
-        time -= TimeUnit.MINUTES.toMillis(minutes);
-        long seconds = TimeUnit.MILLISECONDS.toSeconds(time);
-
-        StringBuilder sb = new StringBuilder(64);
-        if (days > 0) {
-            sb.append(days);
-            sb.append("d");
-        }
-        if (hours > 0) {
-            sb.append(hours);
-            sb.append("h");
-        }
-        if (minutes > 0) {
-            sb.append(minutes);
-            sb.append("m");
-        }
-        if (seconds > 0) {
-            sb.append(seconds);
-            sb.append("s");
-        }
-
-        return (sb.toString());
-    }
-
-    private List<List<String>> getTransitionDurationData(List<IssueInfo> data, List<WorkflowTransitions> transitions) {
-
-        String issueLink = "<a href=\"/jira/browse/#issueKey\">#issueKey</a>";
-        List<List<String>> result = new ArrayList<List<String>>();
-        List<List<Integer>> average = new ArrayList<List<Integer>>();
+        List<IssueWorkflowTransitionRcd> averageDataRow = new ArrayList<IssueWorkflowTransitionRcd>();
         for (int i = 0; i < transitions.size(); i++) {
-            average.add(new ArrayList<Integer>());
+            averageDataRow.add(new IssueWorkflowTransitionRcd(transitions.get(i), null, new ArrayList<Integer>()));
         }
+        result.add(averageDataRow); // First Row is the average data
 
         for (IssueInfo issue : data) {
-            List<String> oneRow = new ArrayList<String>();
-            oneRow.add(issueLink.replaceAll("#issueKey", issue.getIssueKey()));
-            oneRow.add(issue.getIssueTitle());
+            List<IssueWorkflowTransitionRcd> oneRow = new ArrayList<IssueWorkflowTransitionRcd>();
             for (int i = 0; i < transitions.size(); i++) {
                 List<Integer> timeSpend = issue.getTimeSpentOnTransition(transitions.get(i));
-                if (timeSpend.size() > 0) {
-                    average.get(i).addAll(timeSpend);
-
-                    StringBuilder builder = new StringBuilder();
-
-                    builder.append(getDurationBreakdown(Math.round(sum(timeSpend) / timeSpend.size())));
-
-                    if (timeSpend.size() > 1) {
-                        builder.append(" (").append(timeSpend.size()).append(")");
-                        builder.append("<span class=\"popover above\" style=\"display:none;\">");
-                        for (Integer eachItem : timeSpend) {
-                            builder.append("<p>").append(getDurationBreakdown(eachItem)).append("</p>");
-                        }
-                        builder.append("</span>");
-                    }
-
-                    oneRow.add(builder.toString());
-                } else {
-                    oneRow.add("---");
-                }
+                oneRow.add(new IssueWorkflowTransitionRcd(transitions.get(i), issue, timeSpend));
+                averageDataRow.get(i).appendActualData(timeSpend);
             }
             result.add(oneRow);
         }
 
-        List<String> oneRow = new ArrayList<String>();
-        oneRow.add("");
-        oneRow.add("Average");
-        for (int i = 0; i < transitions.size(); i++) {
-            oneRow.add(getDurationBreakdown(Math.round(sum(average.get(i)) / average.get(i).size())));
-        }
-        result.add(oneRow);
         return result;
     }
 
@@ -212,7 +144,15 @@ public class ProductsReleaseWorkflowTimeStaticsReport extends AbstractReport {
         // Get all the deployed environment information
         List<WorkflowTransitions> transitionsList = getIdenticalTransitions(data);
 
-        List<List<String>> tableData = getTransitionDurationData(data, transitionsList);
+        //Get all the transition data
+        List<List<IssueWorkflowTransitionRcd>> tableData = getTransitionDurationData(data, transitionsList);
+        List<IssueWorkflowTransitionRcd> averageData = tableData.get(0);
+        List<List<IssueWorkflowTransitionRcd>> issueRelatedData = tableData.subList(1, tableData.size());
+
+        //Get the top 10 time consuming items
+        IssueWorkflowTransitionRcd[] sortedAverageData = averageData.toArray(new IssueWorkflowTransitionRcd[0]);
+        Arrays.sort(sortedAverageData, IssueWorkflowTransitionRcd.TransitionAverageSpentTimeComparator);
+        //List<IssueWorkflowTransitionRcd> topTimeConsumingTransitions = Arrays.asList(sortedAverageData).subList(ONE_DAY_IN_MILLIONS, ONE_DAY_IN_MILLIONS);
 
         // Pass the issues to the velocity template
         Map<String, Object> velocityParams = new HashMap<String, Object>();
@@ -223,8 +163,8 @@ public class ProductsReleaseWorkflowTimeStaticsReport extends AbstractReport {
         velocityParams.put("dateFormatter", dateTimeFormatter.withStyle(DateTimeStyle.DATE_PICKER).forLoggedInUser());
         velocityParams.put("dateTimeFormatter", dateTimeFormatter.withStyle(DateTimeStyle.COMPLETE).forLoggedInUser());
         velocityParams.put("transitions", transitionsList);
-        velocityParams.put("tableData", tableData.subList(0, tableData.size() - 1));
-        velocityParams.put("summery", tableData.subList(tableData.size() - 1, tableData.size()));
+        velocityParams.put("tableData", issueRelatedData);
+        velocityParams.put("summery", averageData);
         velocityParams.put("issues", data);
         velocityParams.put("today", new Date());
 

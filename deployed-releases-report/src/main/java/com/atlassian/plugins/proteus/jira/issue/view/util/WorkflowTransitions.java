@@ -33,6 +33,19 @@ public class WorkflowTransitions implements Comparable<WorkflowTransitions> {
     }
 
     /**
+     * Creates a new instance of <code>WorkflowTransitions</code>.
+     * 
+     * @param fromStatus
+     * @param toStatus
+     * @param stepRating
+     */
+    public WorkflowTransitions(String fromStatus, String toStatus, int stepRating) {
+        this.fromStatus = fromStatus;
+        this.toStatus = toStatus;
+        this.stepRating = stepRating;
+    }
+
+    /**
      * @return String
      */
     public String getFromStatus() {

@@ -8,6 +8,42 @@ AJS.$(document).ready(function() {
 });
 </script>
 
+<script type="text/javascript">
+var chartTitle = "Success vs Failed Deployments for $projectName";
+window.onload = function () {
+    var chart = new CanvasJS.Chart("chartContainer",
+    {
+        title:{
+            text: chartTitle
+        },
+        animationEnabled: true,
+        legend:{
+            verticalAlign: "center",
+            horizontalAlign: "left",
+            fontSize: 20,
+            fontFamily: "Helvetica"        
+        },
+        theme: "theme2",
+        data: [
+        {        
+            type: "pie",       
+            indexLabelFontFamily: "Garamond",       
+            indexLabelFontSize: 20,
+            indexLabel: "{label} ({quantity}) {y}%",
+            startAngle:-20,      
+            showInLegend: true,
+            toolTipContent:"{legendText} {y}%",
+            dataPoints: [
+                {  y: 80, legendText:"Successful", label: "Successful", quantity: 160 },
+                {  y: 20, legendText:"Failed", label: "Failed", quantity: 40 }
+            ]
+        }
+        ]
+    });
+    chart.render();
+}
+</script>
+
 <div style="padding: 5px">
 <div style="height: 12px;">
 <a id="download-excel-link" class="btn btn-default" href="#" role="button" style="float:right; clear:right;">Download Report as Excel</a>
@@ -40,17 +76,25 @@ Report Details:
         #end  
     </tr>
     <tr style="background: #EEEEEE;">
-        #foreach ($item in $summery.get(0))
+        <th></th>
+        <th>Average</th>
+        #foreach ($item in $summery)
             <th>
-             $item
+             $item.getFormattedDuration()
             </th>
         #end        
     </tr>
     #foreach ($rowdata in $tableData)
         <tr>
+            <td>
+                <a href="/jira/browse/$rowdata.get(0).getIssue().getIssueKey()">$rowdata.get(0).getIssue().getIssueKey()</a>
+            </td>
+            <td>
+                $rowdata.get(0).getIssue().getIssueTitle()
+            </td>
             #foreach ($item in $rowdata)
                 <td>             
-                    $item        
+                    $item.getFormattedDuration()        
                 </td>
             #end
         </tr>
@@ -58,3 +102,9 @@ Report Details:
 	</thead>
 </table>
 </div>
+
+<!--Report Details section-->
+<div class="report-section-header">
+Report Pie Chart
+</div>
+<div id="chartContainer" style="height: 300px; width: 100%;"></div>

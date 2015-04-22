@@ -12,6 +12,7 @@ package com.atlassian.plugins.proteus.jira.issue.view.util;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import com.atlassian.jira.component.ComponentAccessor;
 import com.atlassian.jira.issue.customfields.option.Options;
@@ -104,6 +105,53 @@ public class JiraReportUtils {
         String envCustomFieldName = JiraReportUtils.getDeployEnvironmentCustomFieldName(JiraReportUtils
                 .getProjectReleaseIssueTypes(project).get(0));
         return JiraReportUtils.getCustomFieldOptionValues(envCustomFieldName);
+    }
+
+    /**
+     * @param millis
+     * @return String
+     */
+    public static String getDurationBreakdown(long millis) {
+        long time = millis;
+        if (time < 0) {
+            throw new IllegalArgumentException("Duration must be greater than zero!");
+        }
+
+        long days = TimeUnit.MILLISECONDS.toDays(time);
+        time -= TimeUnit.DAYS.toMillis(days);
+        long hours = TimeUnit.MILLISECONDS.toHours(time);
+        time -= TimeUnit.HOURS.toMillis(hours);
+        long minutes = TimeUnit.MILLISECONDS.toMinutes(time);
+        time -= TimeUnit.MINUTES.toMillis(minutes);
+        long seconds = TimeUnit.MILLISECONDS.toSeconds(time);
+
+        StringBuilder sb = new StringBuilder(64);
+        if (days > 0) {
+            sb.append(days);
+            sb.append("d");
+        }
+        if (hours > 0) {
+            sb.append(hours);
+            sb.append("h");
+        }
+        if (minutes > 0) {
+            sb.append(minutes);
+            sb.append("m");
+        }
+        if (seconds > 0) {
+            sb.append(seconds);
+            sb.append("s");
+        }
+
+        return (sb.toString());
+    }
+
+    public static Integer sum(List<Integer> list) {
+        Integer result = 0;
+        for (Integer it : list) {
+            result += it;
+        }
+        return result;
     }
 
 }

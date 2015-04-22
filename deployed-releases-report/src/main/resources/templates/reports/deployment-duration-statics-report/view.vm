@@ -61,36 +61,39 @@ Report Details:
     </tr>
     </thead>    
     #foreach ($issue in $issues)
-        #if($issue.isEverDeployed())
-            <tr>
-                <td>
-                    <a href="/jira/browse/$issue.getIssueKey()">$issue.getIssueKey()</a>
-                </td>       
-                <td>
-                    $issue.getIssueTitle()
-                </td> 
-                <td>
-                    #foreach ($comp in $issue.getDeployedComponent())
-                    <p>$comp</p>
-                    #end                    
-                </td>
-                <td>
-                    #foreach ($compVer in $issue.getDeployedVersion())
-                    <p>$compVer</p>
-                    #end  
-                </td>
-                #foreach ($env in $environments)
-                #set ($activity = false)
-                <td>
-                    #set ($activity = $issue.getLastSuccessDeploymentToEnv($env))                   
-                    #if($activity)
-                       2s
-                    #else 
-                       ---
-                    #end
-                </td>
-                #end      
-            </tr>
+        #if($issue.isEverDeployed())     
+            #set($activityMap = $issue.getLastSuccessDeploymentToEnvironments($environments))            
+            #if($activityMap.size() > 0)
+                <tr>
+                    <td>
+                        <a href="/jira/browse/$issue.getIssueKey()">$issue.getIssueKey()</a>
+                    </td>       
+                    <td>
+                        $issue.getIssueTitle()
+                    </td> 
+                    <td>
+                        #foreach ($comp in $issue.getDeployedComponent())
+                        <p>$comp</p>
+                        #end                    
+                    </td>
+                    <td>
+                        #foreach ($compVer in $issue.getDeployedVersion())
+                        <p>$compVer</p>
+                        #end  
+                    </td>
+                    #foreach ($env in $environments)
+                    #set ($activity = false)
+                    <td>
+                        #set ($activity = $activityMap.get($env))                 
+                        #if($activity)
+                           2s
+                        #else 
+                           ---
+                        #end
+                    </td>
+                    #end      
+                </tr>
+           #end
         #end
     #end
 </table>

@@ -88,10 +88,13 @@ public class ProductsReleaseWorkflowTimeStaticsReport extends AbstractReport {
     private List<WorkflowTransitions> getIdenticalTransitions(List<IssueInfo> data) {
         Map<String, WorkflowTransitions> resultMap = new HashMap<String, WorkflowTransitions>();
         for (IssueInfo issue : data) {
-            for (int i = 0; i < issue.getStatusChangeRcd().size(); i++) {
-                WorkflowTransitions transition = new WorkflowTransitions(issue.getStatusChangeRcd().get(i), i);
-                if (resultMap.get(transition.getUniqueId()) == null) {
+            List<WorkflowTransitions> issueIdenticalResults = issue.getIdenticalTransitions();
+            for (WorkflowTransitions transition : issueIdenticalResults) {
+                WorkflowTransitions tmp = resultMap.get(transition.getUniqueId());
+                if (tmp == null) {
                     resultMap.put(transition.getUniqueId(), transition);
+                } else {
+                    tmp.setStepRating(tmp.getStepRating() + transition.getStepRating());
                 }
             }
         }

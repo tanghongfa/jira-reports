@@ -2,6 +2,7 @@ package com.atlassian.plugins.proteus.jira.issue.view.util;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -417,5 +418,19 @@ public class IssueInfo implements Comparable<IssueInfo> {
             }
         }
         return periods;
+    }
+
+    public List<WorkflowTransitions> getIdenticalTransitions() {
+        Map<String, WorkflowTransitions> resultMap = new HashMap<String, WorkflowTransitions>();
+        for (int i = 0; i < this.getStatusChangeRcd().size(); i++) {
+            WorkflowTransitions transition = new WorkflowTransitions(this.getStatusChangeRcd().get(i), i);
+            WorkflowTransitions tmp = resultMap.get(transition.getUniqueId());
+            if (tmp == null) {
+                resultMap.put(transition.getUniqueId(), transition);
+            }
+        }
+        WorkflowTransitions[] list = resultMap.values().toArray(new WorkflowTransitions[0]);
+        List<WorkflowTransitions> result = Arrays.asList(list);
+        return result;
     }
 }

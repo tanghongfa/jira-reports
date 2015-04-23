@@ -62,8 +62,8 @@ Report Details:
     </thead>    
     #foreach ($issue in $issues)
         #if($issue.isEverDeployed())     
-            #set($activityMap = $issue.getLastSuccessDeploymentToEnvironments($environments))            
-            #if($activityMap.size() > 0)
+            #set($durationMap = $issue.getLastSuccessAutoDeploymentDurationToEnvironments($environments))            
+            #if($durationMap.size() > 0)
                 <tr>
                     <td>
                         <a href="/jira/browse/$issue.getIssueKey()">$issue.getIssueKey()</a>
@@ -82,11 +82,11 @@ Report Details:
                         #end  
                     </td>
                     #foreach ($env in $environments)
-                    #set ($activity = false)
+                    #set ($duration = false)
                     <td>
-                        #set ($activity = $activityMap.get($env))                 
-                        #if($activity)
-                           2s
+                        #set ($duration = $durationMap.get($env))                 
+                        #if($duration)
+                           $issue.formatDuration($duration)
                         #else 
                            ---
                         #end

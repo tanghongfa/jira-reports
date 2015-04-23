@@ -321,6 +321,61 @@ public class IssueInfo implements Comparable<IssueInfo> {
         return result;
     }
 
+    public Long getLastSuccessDeploymentDurationToEnvironment(String environment) {
+        DeploymentActivityRecord lastSuccessActivity = null;
+        DeploymentActivityRecord lastDeployFinishedActivity = null;
+        DeploymentActivityRecord lastStartDeploymentActivity = null;
+
+        log.error(activityRcd);
+
+        for (int i = 0; i < activityRcd.size(); i++) {
+            DeploymentActivityRecord activity = activityRcd.get(i);
+            if (activity.getEnvironment().equalsIgnoreCase(environment)) {
+
+                //If it has been confirmed that the final deployment status to this environment is successful, then try to get the last deployment time/activity
+                if ((lastDeployFinishedActivity != null)
+                        && activity.getAction().equalsIgnoreCase(DeploymentActivityRecord.ACTION_TYPE_START_DEPLOY)) {
+                    lastStartDeploymentActivity = activity;
+                    break;//Find all already
+                }
+
+                if ((lastSuccessActivity != null)
+                        && activity.getAction().equalsIgnoreCase(DeploymentActivityRecord.ACTION_TYPE_FINISHED_DEPLOY)) {
+                    lastDeployFinishedActivity = activity;
+                }
+
+                //The last status shows deployment to this environment is successful, just continue the loop to find when the deployment kicked off
+                if ((lastSuccessActivity == null)
+                        && activity.getAction().equalsIgnoreCase(DeploymentActivityRecord.ACTION_TYPE_SUCCESS_DEPLOYED)) {
+                    lastSuccessActivity = activity;
+                }
+
+                //The last status shows deployment to this environment is failed
+                if (activity.getAction().equalsIgnoreCase(DeploymentActivityRecord.ACTION_TYPE_FAIL_DEPLOYED)) {
+                    return null;
+                }
+            }
+        }
+
+        if ((lastDeployFinishedActivity != null) && (lastStartDeploymentActivity != null)) {
+            return lastDeployFinishedActivity.getActionTime().getTime()
+                    - lastStartDeploymentActivity.getActionTime().getTime();
+        }
+
+        return null;
+    }
+
+    public Map<String, Long> getLastSuccessAutoDeploymentDurationToEnvironments(List<String> environmentLst) {
+        Map<String, Long> result = new HashMap<String, Long>();
+        for (String env : environmentLst) {
+            Long duration = getLastSuccessDeploymentDurationToEnvironment(env);
+            if (duration != null) {
+                result.put(env, duration);
+            }
+        }
+        return result;
+    }
+
     public int countSuccessDeployments() {
         if (activityRcd == null) {
             return 0;
@@ -432,5 +487,13 @@ public class IssueInfo implements Comparable<IssueInfo> {
         WorkflowTransitions[] list = resultMap.values().toArray(new WorkflowTransitions[0]);
         List<WorkflowTransitions> result = Arrays.asList(list);
         return result;
+    }
+
+    public String formatDuration(Long duration) {
+        if (duration != null) {
+            return JiraReportUtils.getDurationBreakdown(duration);
+        } else {
+            return "---";
+        }
     }
 }

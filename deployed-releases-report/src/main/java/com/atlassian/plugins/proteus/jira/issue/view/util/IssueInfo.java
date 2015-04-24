@@ -419,11 +419,12 @@ public class IssueInfo implements Comparable<IssueInfo> {
      * @param environment
      * @return String
      */
-    public String getLastStatusValueToEnv(String environment) {
+    public Object[] getLastStatusValueToEnv(String environment) {
         //No environment has set... pre-deploy to any environment
 
         if (!StringUtils.isEmpty(this.getIssueDeployEnv()) && environment.equalsIgnoreCase(this.getIssueDeployEnv())) {
-            return this.getIssueStatus();
+            return new Object[] { this.getIssueStatus(),
+                    this.statusChangeRcd.size() > 0 ? this.statusChangeRcd.get(0).getCreated() : this.issueCreated };
         }
         for (int i = 0; i < this.environmentChangeRcd.size(); i++) {
             SortableChangeHistoryItem item = this.environmentChangeRcd.get(i);
@@ -431,18 +432,31 @@ public class IssueInfo implements Comparable<IssueInfo> {
                 SortableChangeHistoryItem lastStatusChange = getItemBefore(this.statusChangeRcd, item.getCreated());
                 if (lastStatusChange != null) {
                     //There are status change before this environment valuable change. Get the last "TO"
-                    return lastStatusChange.getToString();
+                    return new Object[] { lastStatusChange.getToString(), lastStatusChange.getCreated() };
                 } else if (this.statusChangeRcd.size() > 0) {
                     //There is no status change before this environment change, Get the the earliest  
-                    return this.statusChangeRcd.get(this.statusChangeRcd.size() - 1).getFromString();
+                    SortableChangeHistoryItem lastItem = this.statusChangeRcd.get(this.statusChangeRcd.size() - 1);
+                    return new Object[] { lastItem.getFromString(), lastItem.getCreated() };
                 } else {
                     //This is no status change at all, then just Get the current status.
-                    return this.getIssueStatus();
+                    return new Object[] { this.getIssueStatus(), this.issueCreated };
                 }
             }
         }
 
         return null;
+    }
+
+    public Map<String, List<Object>> getLastStatusValueToEnvironments(List<String> environmentLst) {
+        Map<String, List<Object>> result = new HashMap<String, List<Object>>();
+        for (String env : environmentLst) {
+            Object[] envValue = getLastStatusValueToEnv(env);
+            if (envValue != null) {
+                result.put(env, new ArrayList<Object>(Arrays.asList(envValue)));
+            }
+        }
+
+        return result;
     }
 
     /**

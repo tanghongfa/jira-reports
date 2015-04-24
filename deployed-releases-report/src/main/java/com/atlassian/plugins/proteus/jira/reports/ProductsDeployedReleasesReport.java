@@ -43,8 +43,6 @@ public class ProductsDeployedReleasesReport extends AbstractReport {
     private final ProjectManager projectManager;
     private final DateTimeFormatter dateTimeFormatter;
 
-    private final static String JIRA_CUSTOM_FILED_DEPLOYMENT_TRACKER = "_deployment_tracker";
-
     private final static int ONE_DAY_IN_MILLIONS = 1 * 24 * 60 * 60 * 1000;
 
     /**
@@ -96,7 +94,7 @@ public class ProductsDeployedReleasesReport extends AbstractReport {
 
                 ChangeHistoryManager historyManager = ComponentAccessor.getChangeHistoryManager();
                 List<ChangeItemBean> changes = historyManager.getChangeItemsForField(issue,
-                        JIRA_CUSTOM_FILED_DEPLOYMENT_TRACKER);
+                        JiraReportUtils.JIRA_CUSTOM_FILED_DEPLOYMENT_TRACKER);
                 List<DeploymentActivityRecord> changeRcd = new ArrayList<DeploymentActivityRecord>();
 
                 for (ChangeItemBean change : changes) {

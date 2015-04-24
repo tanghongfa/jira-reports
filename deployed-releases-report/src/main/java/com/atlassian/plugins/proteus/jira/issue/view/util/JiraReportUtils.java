@@ -28,6 +28,8 @@ public class JiraReportUtils {
     private final static String JIRA_JSON_CONFIGURATION_ITEM_CUSTOM_FILED_DEPLOYMENT_ENV = "deployEnviornmentField";
     private final static String JIRA_JSON_CONFIGURATION_FILE_LOCATION = "";
 
+    public final static String JIRA_CUSTOM_FILED_DEPLOYMENT_TRACKER = "_deployment_tracker";
+
     /**
      * @param issueType
      * @return String

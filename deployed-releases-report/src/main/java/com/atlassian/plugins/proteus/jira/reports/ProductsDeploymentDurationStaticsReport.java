@@ -21,6 +21,7 @@ import com.atlassian.jira.issue.search.SearchProvider;
 import com.atlassian.jira.issue.statistics.util.FieldableDocumentHitCollector;
 import com.atlassian.jira.jql.builder.JqlQueryBuilder;
 import com.atlassian.jira.plugin.report.impl.AbstractReport;
+import com.atlassian.jira.project.Project;
 import com.atlassian.jira.project.ProjectManager;
 import com.atlassian.jira.user.ApplicationUser;
 import com.atlassian.jira.util.ParameterUtils;
@@ -41,8 +42,6 @@ public class ProductsDeploymentDurationStaticsReport extends AbstractReport {
     private final SearchProvider searchProvider;
     private final ProjectManager projectManager;
     private final DateTimeFormatter dateTimeFormatter;
-
-    private final static String JIRA_CUSTOM_FILED_DEPLOYMENT_TRACKER = "_deployment_tracker";
 
     private final static int ONE_DAY_IN_MILLIONS = 1 * 24 * 60 * 60 * 1000;
 
@@ -77,8 +76,13 @@ public class ProductsDeploymentDurationStaticsReport extends AbstractReport {
      */
     private List<IssueInfo> loadIssueData(Date startDate, Date endDate, ApplicationUser remoteUser, Long projectId)
             throws SearchException {
+
+        Project project = projectManager.getProjectObj(projectId);
+        List<String> releaseIssueTypes = JiraReportUtils.getProjectReleaseIssueTypes(project);
+
         JqlQueryBuilder queryBuilder = JqlQueryBuilder.newBuilder();
-        Query query = queryBuilder.where().createdBetween(startDate, endDate).and().project(projectId).buildQuery();
+        Query query = queryBuilder.where().createdBetween(startDate, endDate).and().project(projectId).and()
+                .issueType(releaseIssueTypes.toArray(new String[0])).buildQuery();
 
         List<IssueInfo> data = new ArrayList<IssueInfo>();
 
@@ -90,7 +94,7 @@ public class ProductsDeploymentDurationStaticsReport extends AbstractReport {
 
                 ChangeHistoryManager historyManager = ComponentAccessor.getChangeHistoryManager();
                 List<ChangeItemBean> changes = historyManager.getChangeItemsForField(issue,
-                        JIRA_CUSTOM_FILED_DEPLOYMENT_TRACKER);
+                        JiraReportUtils.JIRA_CUSTOM_FILED_DEPLOYMENT_TRACKER);
                 List<DeploymentActivityRecord> changeRcd = new ArrayList<DeploymentActivityRecord>();
 
                 for (ChangeItemBean change : changes) {

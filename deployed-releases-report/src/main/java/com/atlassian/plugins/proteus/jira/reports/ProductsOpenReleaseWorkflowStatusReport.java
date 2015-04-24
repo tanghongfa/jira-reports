@@ -108,9 +108,13 @@ public class ProductsOpenReleaseWorkflowStatusReport extends AbstractReport {
      * @throws SearchException
      */
     private List<IssueInfo> loadIssueData(ApplicationUser remoteUser, Long projectId) throws SearchException {
+
+        Project project = projectManager.getProjectObj(projectId);
+        List<String> releaseIssueTypes = JiraReportUtils.getProjectReleaseIssueTypes(project);
+
         JqlQueryBuilder queryBuilder = JqlQueryBuilder.newBuilder();
-        Query query = queryBuilder.where().not().statusCategory(StatusCategory.COMPLETE).and().project(projectId)
-                .buildQuery();
+        Query query = queryBuilder.where().not().statusCategory(StatusCategory.COMPLETE).and().project(projectId).and()
+                .issueType(releaseIssueTypes.toArray(new String[0])).buildQuery();
 
         List<IssueInfo> data = new ArrayList<IssueInfo>();
 
@@ -135,7 +139,7 @@ public class ProductsOpenReleaseWorkflowStatusReport extends AbstractReport {
             protected void writeIssue(Issue issue, List<IssueInfo> result) {
                 IssueInfo info = new IssueInfo();
                 info.setIssueNo(issue.getId()).setIssueTitle(issue.getSummary()).setIssueKey(issue.getKey())
-                        .setIssueStatus(issue.getStatusObject().getName());
+                        .setIssueStatus(issue.getStatusObject().getName()).setIssueCreated(issue.getCreated());
 
                 String depEnvCustomFieldName = JiraReportUtils.getDeployEnvironmentCustomFieldName(issue
                         .getIssueTypeObject().getName());

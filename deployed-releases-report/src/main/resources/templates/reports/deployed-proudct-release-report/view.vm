@@ -100,9 +100,9 @@ Report Details:
                         <td>
                             #set ($activity = $activityMap.get($env))
                             #if($activity)
-                               $dateTimeFormatter.format($activity.getActionDate())
+                               <span class="tooltip-right-top" report-tooltip="The time of deployment">$dateTimeFormatter.format($activity.getActionDate())</span>
                             #else 
-                               ---
+                               <span class="tooltip-right-top" report-tooltip="No applicable result">---</span>
                             #end
                         </td>
                    #end

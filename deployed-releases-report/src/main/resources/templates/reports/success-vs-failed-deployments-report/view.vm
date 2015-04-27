@@ -90,5 +90,22 @@ Report Information:
 Report Details:
 </div>
 <div id="chartContainer" style="height: 300px; width: 100%;"></div>
-</body>
+
+<!--Report Details Table, only show up for excel result-->
+#if($isExcel == true)
+    <table class="table table-striped table-report">
+        <thead>
+        <tr>
+            <th>Deployment Result</th>
+            <th>Quantity</th>            
+        </tr>
+        </thead>        
+        #foreach ($row in $pieChartData)
+            <tr>
+                <td>$row.get(1)</td>
+                <td>$row.get(3)</td>
+            </tr>
+        #end
+    </table>
+#end
 </div>

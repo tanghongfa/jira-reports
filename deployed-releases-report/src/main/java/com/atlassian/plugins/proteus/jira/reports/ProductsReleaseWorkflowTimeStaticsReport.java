@@ -172,11 +172,8 @@ public class ProductsReleaseWorkflowTimeStaticsReport extends AbstractReport {
         return result;
     }
 
-    /**
-     * Generating the HTML(String) Report
-     */
-    @Override
-    public String generateReportHtml(ProjectActionSupport action, Map params) throws Exception {
+    private String generateReportHtml(ProjectActionSupport action, Map params, String view, boolean isExcel)
+            throws Exception {
         ApplicationUser remoteUser = action.getLoggedInApplicationUser();
 
         Long projectId = ParameterUtils.getLongParam(params, "selectedProjectId");
@@ -215,8 +212,17 @@ public class ProductsReleaseWorkflowTimeStaticsReport extends AbstractReport {
         velocityParams.put("summery", averageData);
         velocityParams.put("issues", data);
         velocityParams.put("today", new Date());
+        velocityParams.put("isExcel", isExcel);
 
         return descriptor.getHtml("view", velocityParams);
+    }
+
+    /**
+     * Generating the HTML(String) Report
+     */
+    @Override
+    public String generateReportHtml(ProjectActionSupport action, Map params) throws Exception {
+        return generateReportHtml(action, params, "view", false);
     }
 
     /**
@@ -320,7 +326,6 @@ public class ProductsReleaseWorkflowTimeStaticsReport extends AbstractReport {
     @Override
     public String generateReportExcel(ProjectActionSupport action, @SuppressWarnings("rawtypes") Map params)
             throws Exception {
-        String result = generateReportHtml(action, params);//"<table><tr><td>Jill</td><td>Smith</td><td>50</td></tr><tr><td>Eve</td><td>Jackson</td><td>94</td></tr><tr><td>John</td><td>Doe</td><td>80</td></tr></table>";
-        return result;
+        return generateReportHtml(action, params, "view", true);
     }
 }

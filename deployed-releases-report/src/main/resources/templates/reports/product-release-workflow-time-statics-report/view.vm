@@ -8,6 +8,16 @@ AJS.$(document).ready(function() {
 });
 </script>
 
+#if($isExcel == true)
+<style>
+table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+    text-align: center;
+}
+</style>
+#end
+
 <script type="text/javascript">
 var chartTitle = "Transition Time Consuming Chart for $projectName";
 var dataPoints = [];
@@ -66,10 +76,12 @@ Report Information:
 <br />
 
 <!--Report Details section-->
-<div class="report-section-header">
-Report Pie Chart
-</div>
-<div id="chartContainer" style="height: 300px; width: 100%; margin-bottom: 10px;"></div>
+#if($isExcel != true)
+    <div class="report-section-header">
+    Report Pie Chart
+    </div>
+    <div id="chartContainer" style="height: 300px; width: 100%; margin-bottom: 10px;"></div>
+#end
 
 <!--Report Details section-->
 <div class="report-section-header">
@@ -89,7 +101,11 @@ Report Details:
         <th>Average</th>
         #foreach ($item in $summery)
             <th>
-             $item.getFormattedDuration()
+                #if($isExcel == true)
+                   $item.getAverageTime() 
+                #else
+                    $item.getFormattedDuration() 
+                #end                
             </th>
         #end        
     </tr>
@@ -103,7 +119,17 @@ Report Details:
             </td>
             #foreach ($item in $rowdata)
                 <td>             
-                    $item.getFormattedDuration()        
+                    #if($isExcel == true)
+                       #set ($tmpTime = false)
+                       #set ($tmpTime = $item.getAverageTime())
+                       #if($tmpTime)
+                            $tmpTime
+                       #else
+                            ---
+                       #end                       
+                    #else
+                       $item.getFormattedDuration() 
+                    #end        
                 </td>
             #end
         </tr>

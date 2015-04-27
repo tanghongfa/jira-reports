@@ -9,9 +9,11 @@
  *----------------------------------------------------------------------------*/
 package com.atlassian.plugins.proteus.jira.issue.view.util;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
 import com.atlassian.jira.component.ComponentAccessor;
@@ -19,14 +21,16 @@ import com.atlassian.jira.issue.customfields.option.Options;
 import com.atlassian.jira.issue.fields.CustomField;
 import com.atlassian.jira.issue.issuetype.IssueType;
 import com.atlassian.jira.project.Project;
+import com.atlassian.jira.util.json.JSONObject;
 
 /**
  * The purpose of this class is for all the utility APIs
  */
 public class JiraReportUtils {
 
+    private final static String JIRA_JSON_CONFIGURATION_CUSTOM_FIELDS_CONFIGURATION_ITEM = "customFields";
     private final static String JIRA_JSON_CONFIGURATION_ITEM_CUSTOM_FILED_DEPLOYMENT_ENV = "deployEnviornmentField";
-    private final static String JIRA_JSON_CONFIGURATION_FILE_LOCATION = "";
+    private final static String JIRA_JSON_CONFIGURATION_FILENAME = "G:\\tanghongfa\\projects\\Telstra_Diamond_P3\\code\\diamondp3\\scripts\\jira_postaction_update_puppetrepo_trigger_bambooplan_config.json";
 
     public final static String JIRA_CUSTOM_FILED_DEPLOYMENT_TRACKER = "_deployment_tracker";
 
@@ -35,37 +39,35 @@ public class JiraReportUtils {
      * @return String
      */
     public static String getDeployEnvironmentCustomFieldName(String issueType) {
-        //        try {
-        //            //TODO: fix up this part later on ... read up the configuration file and get the configuration for it
-        //            //            String content = new Scanner(new File("filename")).useDelimiter("\\Z").next();
-        //            //            JSONObject obj = new JSONObject(content);
-        //
-        //            return "DVN2 Environment";
-        //
-        //        } catch (Exception e) {
-        //            // TODO Auto-generated catch block
-        //            e.printStackTrace();
-        //        }
-        //        return null;
+        try {
+            //TODO: fix up this part later on ... read up the configuration file and get the configuration for it
+            String content = new Scanner(new File(JIRA_JSON_CONFIGURATION_FILENAME)).useDelimiter("\\Z").next();
+            JSONObject obj = new JSONObject(content);
 
-        return "DVN2 Environment";
+            JSONObject issueTypeConfiguration = obj.getJSONObject(issueType);
+            if (issueTypeConfiguration != null) {
+                JSONObject customFieldConfiguraiton = issueTypeConfiguration
+                        .getJSONObject(JIRA_JSON_CONFIGURATION_CUSTOM_FIELDS_CONFIGURATION_ITEM);
+                return customFieldConfiguraiton.getString(JIRA_JSON_CONFIGURATION_ITEM_CUSTOM_FILED_DEPLOYMENT_ENV);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public static String getDeployEnvironmentCustomFieldName(List<String> issueTypes) {
-        //        try {
-        //            //TODO: fix up this part later on ... read up the configuration file and get the configuration for it
-        //            //            String content = new Scanner(new File("filename")).useDelimiter("\\Z").next();
-        //            //            JSONObject obj = new JSONObject(content);
-        //
-        //            return "DVN2 Environment";
-        //
-        //        } catch (Exception e) {
-        //            // TODO Auto-generated catch block
-        //            e.printStackTrace();
-        //        }
-        //        return null;
-
-        return "DVN2 Environment";
+        try {
+            for (String issueType : issueTypes) {
+                String fieldName = getDeployEnvironmentCustomFieldName(issueType);
+                if (fieldName != null) {
+                    return fieldName;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     /**

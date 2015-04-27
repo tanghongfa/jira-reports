@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -432,14 +433,15 @@ public class IssueInfo implements Comparable<IssueInfo> {
                 SortableChangeHistoryItem lastStatusChange = getItemBefore(this.statusChangeRcd, item.getCreated());
                 if (lastStatusChange != null) {
                     //There are status change before this environment valuable change. Get the last "TO"
-                    return new Object[] { lastStatusChange.getToString(), lastStatusChange.getCreated() };
+                    return new Object[] { lastStatusChange.getToString(),
+                            new Date(lastStatusChange.getCreated().getTime()) };
                 } else if (this.statusChangeRcd.size() > 0) {
                     //There is no status change before this environment change, Get the the earliest  
                     SortableChangeHistoryItem lastItem = this.statusChangeRcd.get(this.statusChangeRcd.size() - 1);
-                    return new Object[] { lastItem.getFromString(), lastItem.getCreated() };
+                    return new Object[] { lastItem.getFromString(), new Date(lastItem.getCreated().getTime()) };
                 } else {
                     //This is no status change at all, then just Get the current status.
-                    return new Object[] { this.getIssueStatus(), this.issueCreated };
+                    return new Object[] { this.getIssueStatus(), new Date(this.issueCreated.getTime()) };
                 }
             }
         }

@@ -16,17 +16,21 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.log4j.Logger;
+
 import com.atlassian.jira.component.ComponentAccessor;
 import com.atlassian.jira.issue.customfields.option.Options;
 import com.atlassian.jira.issue.fields.CustomField;
 import com.atlassian.jira.issue.issuetype.IssueType;
 import com.atlassian.jira.project.Project;
+import com.atlassian.jira.util.json.JSONException;
 import com.atlassian.jira.util.json.JSONObject;
 
 /**
  * The purpose of this class is for all the utility APIs
  */
 public class JiraReportUtils {
+    private static final Logger log = Logger.getLogger(JiraReportUtils.class);
 
     private final static String JIRA_JSON_CONFIGURATION_CUSTOM_FIELDS_CONFIGURATION_ITEM = "customFields";
     private final static String JIRA_JSON_CONFIGURATION_ITEM_CUSTOM_FILED_DEPLOYMENT_ENV = "deployEnviornmentField";
@@ -50,24 +54,46 @@ public class JiraReportUtils {
                         .getJSONObject(JIRA_JSON_CONFIGURATION_CUSTOM_FIELDS_CONFIGURATION_ITEM);
                 return customFieldConfiguraiton.getString(JIRA_JSON_CONFIGURATION_ITEM_CUSTOM_FILED_DEPLOYMENT_ENV);
             }
+        } catch (JSONException e) {
+            //Ignore -- It's quite normal
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
         return null;
     }
 
     public static String getDeployEnvironmentCustomFieldName(List<String> issueTypes) {
-        try {
-            for (String issueType : issueTypes) {
-                String fieldName = getDeployEnvironmentCustomFieldName(issueType);
-                if (fieldName != null) {
-                    return fieldName;
-                }
+        for (String issueType : issueTypes) {
+            String fieldName = getDeployEnvironmentCustomFieldName(issueType);
+            if (fieldName != null) {
+                return fieldName;
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
         return null;
+    }
+
+    private static List<String> getReleaseIssueTypes(List<String> issueTypes) {
+        List<String> result = new ArrayList<String>();
+        try {
+            //TODO: fix up this part later on ... read up the configuration file and get the configuration for it
+            String content = new Scanner(new File(JIRA_JSON_CONFIGURATION_FILENAME)).useDelimiter("\\Z").next();
+            JSONObject obj = new JSONObject(content);
+
+            for (String issueType : issueTypes) {
+                try {
+                    JSONObject issueTypeConfiguration = obj.getJSONObject(issueType);
+                    if (issueTypeConfiguration != null) {
+                        result.add(issueType);
+                    }
+                } catch (JSONException e) {
+                    //It's normall
+                }
+            }
+            //Ignore -- It's quite normal
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return result;
     }
 
     /**
@@ -95,11 +121,14 @@ public class JiraReportUtils {
      * @return List<String>
      */
     public static List<String> getProjectReleaseIssueTypes(Project project) {
-        //TODO: Fix it up by checking if the issue type is configured in the configuration json file
         List<String> result = new ArrayList<String>();
         Collection<IssueType> issueTypes = project.getIssueTypes();
         for (IssueType type : issueTypes) {
             result.add(type.getName());
+        }
+        result = getReleaseIssueTypes(result);
+        if (result.size() == 0) {
+            log.error("No release issue type is configured for project:" + project.getName());
         }
         return result;
     }
@@ -107,7 +136,12 @@ public class JiraReportUtils {
     public static List<String> getDeployedEnvironments(Project project) {
         //Right now, we will assume all the issues within one project will use same target environment configuration (Even though one project may have different workflows etc.)
         String envCustomFieldName = JiraReportUtils.getDeployEnvironmentCustomFieldName(JiraReportUtils
-                .getProjectReleaseIssueTypes(project).get(0));
+                .getProjectReleaseIssueTypes(project));
+        if (null == envCustomFieldName) {
+            log.error("Deployment Environment Custom Field is NOT configured for the release workflows for project:"
+                    + project.getName());
+            return new ArrayList<String>();
+        }
         return JiraReportUtils.getCustomFieldOptionValues(envCustomFieldName);
     }
 

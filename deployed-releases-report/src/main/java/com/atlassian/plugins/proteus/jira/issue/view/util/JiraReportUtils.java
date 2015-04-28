@@ -75,7 +75,6 @@ public class JiraReportUtils {
     private static List<String> getReleaseIssueTypes(List<String> issueTypes) {
         List<String> result = new ArrayList<String>();
         try {
-            //TODO: fix up this part later on ... read up the configuration file and get the configuration for it
             String content = new Scanner(new File(JIRA_JSON_CONFIGURATION_FILENAME)).useDelimiter("\\Z").next();
             JSONObject obj = new JSONObject(content);
 

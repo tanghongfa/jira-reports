@@ -468,6 +468,9 @@ public class IssueInfo implements Comparable<IssueInfo> {
         return (activityRcd != null) && (activityRcd.size() > 0);
     }
 
+    /**
+     * @return boolean
+     */
     public boolean isEverChangedStatus() {
         return (statusChangeRcd != null) && (statusChangeRcd.size() > 0);
     }

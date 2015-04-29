@@ -1,0 +1,12 @@
+{ 
+	"Telstra Releases":{  
+      "customFields":{  
+         "deployEnviornmentField":"DVN2 Environment",
+         "deployComponentField":"Deployment Component",
+         "deployComponentNewVersionField":"Component Version",
+         "deployComponentOldVersionField":"Current Version",
+         "isRollbackIndicationField":"is_rollback",
+		 "deploymentResultFeild":"Deployment Result"
+      }
+   }
+}

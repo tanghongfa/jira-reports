@@ -34,18 +34,30 @@ public class JiraReportUtils {
 
     private final static String JIRA_JSON_CONFIGURATION_CUSTOM_FIELDS_CONFIGURATION_ITEM = "customFields";
     private final static String JIRA_JSON_CONFIGURATION_ITEM_CUSTOM_FILED_DEPLOYMENT_ENV = "deployEnviornmentField";
-    private final static String JIRA_JSON_CONFIGURATION_FILENAME = "G:\\tanghongfa\\projects\\Telstra_Diamond_P3\\code\\diamondp3\\scripts\\jira_postaction_update_puppetrepo_trigger_bambooplan_config.json";
 
+    /**
+     * <code>JIRA_CUSTOM_FILED_DEPLOYMENT_TRACKER</code>
+     */
     public final static String JIRA_CUSTOM_FILED_DEPLOYMENT_TRACKER = "_deployment_tracker";
+
+    private static String getJiraJsonConfigurationFileName() {
+        String baseFolder = "/opt/atlassian/jira/scripts/conf/";
+        String osName = System.getProperty("os.name");
+        if ((osName != null) && osName.toLowerCase().contains("windows")) {
+            baseFolder = "C:\\jira_reports\\scripts\\conf\\";
+        }
+        return baseFolder + "deployment_bambooplan.json";
+    }
 
     /**
      * @param issueType
      * @return String
      */
     public static String getDeployEnvironmentCustomFieldName(String issueType) {
+        Scanner fileScanner = null;
         try {
-            //TODO: fix up this part later on ... read up the configuration file and get the configuration for it
-            String content = new Scanner(new File(JIRA_JSON_CONFIGURATION_FILENAME)).useDelimiter("\\Z").next();
+            fileScanner = new Scanner(new File(getJiraJsonConfigurationFileName()));
+            String content = fileScanner.useDelimiter("\\Z").next();
             JSONObject obj = new JSONObject(content);
 
             JSONObject issueTypeConfiguration = obj.getJSONObject(issueType);
@@ -58,10 +70,18 @@ public class JiraReportUtils {
             //Ignore -- It's quite normal
         } catch (Exception e) {
             log.error(e.getMessage());
+        } finally {
+            if (fileScanner != null) {
+                fileScanner.close();
+            }
         }
         return null;
     }
 
+    /**
+     * @param issueTypes
+     * @return String
+     */
     public static String getDeployEnvironmentCustomFieldName(List<String> issueTypes) {
         for (String issueType : issueTypes) {
             String fieldName = getDeployEnvironmentCustomFieldName(issueType);
@@ -74,8 +94,10 @@ public class JiraReportUtils {
 
     private static List<String> getReleaseIssueTypes(List<String> issueTypes) {
         List<String> result = new ArrayList<String>();
+        Scanner fileScanner = null;
         try {
-            String content = new Scanner(new File(JIRA_JSON_CONFIGURATION_FILENAME)).useDelimiter("\\Z").next();
+            fileScanner = new Scanner(new File(getJiraJsonConfigurationFileName()));
+            String content = fileScanner.useDelimiter("\\Z").next();
             JSONObject obj = new JSONObject(content);
 
             for (String issueType : issueTypes) {
@@ -91,6 +113,10 @@ public class JiraReportUtils {
             //Ignore -- It's quite normal
         } catch (Exception e) {
             log.error(e.getMessage());
+        } finally {
+            if (fileScanner != null) {
+                fileScanner.close();
+            }
         }
         return result;
     }
@@ -132,6 +158,10 @@ public class JiraReportUtils {
         return result;
     }
 
+    /**
+     * @param project
+     * @return List<String>
+     */
     public static List<String> getDeployedEnvironments(Project project) {
         //Right now, we will assume all the issues within one project will use same target environment configuration (Even though one project may have different workflows etc.)
         String envCustomFieldName = JiraReportUtils.getDeployEnvironmentCustomFieldName(JiraReportUtils
@@ -183,6 +213,10 @@ public class JiraReportUtils {
         return (sb.toString());
     }
 
+    /**
+     * @param list
+     * @return Integer
+     */
     public static Integer sum(List<Integer> list) {
         Integer result = 0;
         for (Integer it : list) {

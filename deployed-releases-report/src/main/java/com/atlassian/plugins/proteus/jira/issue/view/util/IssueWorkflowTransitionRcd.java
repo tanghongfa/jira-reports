@@ -12,12 +12,22 @@ package com.atlassian.plugins.proteus.jira.issue.view.util;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * This is extension to Jira WorkflowTransitions
+ */
 public class IssueWorkflowTransitionRcd extends WorkflowTransitions {
 
     private Integer averageTime;
     private List<Integer> actualData;
     private IssueInfo issue;
 
+    /**
+     * Creates a new instance of
+     * <code>IssueWorkflowTransitionRcd</code>.
+     * 
+     * @param transition
+     * @param issue
+     */
     public IssueWorkflowTransitionRcd(WorkflowTransitions transition, IssueInfo issue) {
         super(transition.getFromStatus(), transition.getToStatus(), transition.getStepRating());
         this.issue = issue;

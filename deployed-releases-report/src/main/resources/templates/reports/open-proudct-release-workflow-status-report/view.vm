@@ -62,7 +62,7 @@ Report Details:
         #if($envStatusMap.size() > 0) 
             <tr>
                 <td>
-                    <a href="/jira/browse/$issue.getIssueKey()">$issue.getIssueKey()</a>
+                    <a href="/browse/$issue.getIssueKey()">$issue.getIssueKey()</a>
                 </td>       
                 <td>
                     $issue.getIssueTitle()

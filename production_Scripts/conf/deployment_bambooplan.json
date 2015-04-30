@@ -1,14 +1,4 @@
 { 
-	"Telstra Releases":{  
-      "customFields":{  
-         "deployEnviornmentField":"DVN2 Environment",
-         "deployComponentField":"Deployment Component",
-         "deployComponentNewVersionField":"Component Version",
-         "deployComponentOldVersionField":"Current Version",
-         "isRollbackIndicationField":"is_rollback",
-		 "deploymentResultFeild":"Deployment Result"
-      }
-   },
    "Puppet Auto Deploy Demo" : {
 		"customFields":{  
 			 "deployEnviornmentField":"DVN2 Environment",
@@ -17,6 +7,17 @@
 			 "deployComponentOldVersionField":"Current Version",
 			 "isRollbackIndicationField":"is_rollback",
 			 "deploymentResultFeild":"Deployment Verification Outcome"
+		},
+		"bambooPuppetAutoDeployPlan":{  
+			 "baseUrl":"http://10.208.78.40:5020/rest/api/latest/queue/",
+			 "authUser":"bamboo_service_user",
+			 "authPwd":"test1234",
+			 "environmentToPlanIdMapping":{  
+				"DEV2":"PRCCMS-PAD0",
+				"SIT":"PRCCMS-PAD5",
+				"Model":"PRCCMS-PAD4",
+				"Standby":"PRCCMS-PAD0",
+			 }
 		}
-   }
+	}
 }

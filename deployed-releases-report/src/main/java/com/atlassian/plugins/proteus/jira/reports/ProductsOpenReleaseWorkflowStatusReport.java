@@ -112,6 +112,11 @@ public class ProductsOpenReleaseWorkflowStatusReport extends AbstractReport {
         Project project = projectManager.getProjectObj(projectId);
         List<String> releaseIssueTypes = JiraReportUtils.getProjectReleaseIssueTypes(project);
 
+        //There is NO release issue type for this project, the report is NOT applicable and will not do anything
+        if ((releaseIssueTypes == null) || (releaseIssueTypes.size() <= 0)) {
+            return new ArrayList<IssueInfo>();
+        }
+
         JqlQueryBuilder queryBuilder = JqlQueryBuilder.newBuilder();
         Query query = queryBuilder.where().not().statusCategory(StatusCategory.COMPLETE).and().project(projectId).and()
                 .issueType(releaseIssueTypes.toArray(new String[0])).buildQuery();

@@ -112,7 +112,7 @@ Report Details:
     #foreach ($rowdata in $tableData)
         <tr>
             <td>
-                <a href="/jira/browse/$rowdata.get(0).getIssue().getIssueKey()">$rowdata.get(0).getIssue().getIssueKey()</a>
+                <a href="/browse/$rowdata.get(0).getIssue().getIssueKey()">$rowdata.get(0).getIssue().getIssueKey()</a>
             </td>
             <td>
                 $rowdata.get(0).getIssue().getIssueTitle()

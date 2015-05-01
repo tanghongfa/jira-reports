@@ -4,6 +4,25 @@ $webResourceManager.requireResourcesForContext("jira-report-plugin")
 <script>
 AJS.$(document).ready(function() {
     AJS.$("#download-excel-link").attr("href", AJS.$(".excel a").attr("href"));
+    
+    
+    
+    //Filtering function for the deployment environments
+    AJS.$("#environmentFilter").on( "change",  function(e){
+        var selectedVal = AJS.$("#environmentFilter").val();
+        AJS.$(".env_item").show();
+        
+        if(selectedVal != "all") {
+            AJS.$(".env_item").each(function() {
+                if(!AJS.$(this).hasClass(selectedVal)) {
+                    AJS.$(this).hide();
+                }
+            });
+        }
+        
+    });
+    
+    
 });
 </script>
 #end
@@ -40,6 +59,18 @@ Report Information:
        <tr><td>Project Name:</td><td>$projectName</td></tr>
        <tr><td>Time Period:</td><td>$dateFormatter.format($startDate) - $dateFormatter.format($endDate)</td></tr>       
        <tr><td>Generated On:</td><td>$dateTimeFormatter.format($today)</td></tr>
+       #if($isExcel == false)
+       <tr><td>Environment Filter:</td>
+            <td>
+                <select id="environmentFilter">
+                  <option value="all">All</option>
+                  #foreach ($env in $environments)
+                  <option value="$env">$env</option>
+                  #end
+                </select>
+            </td>
+      </tr>
+      #end
    </table>
 </div>
 <br />
@@ -56,7 +87,7 @@ Report Details:
         <th>Component</th>
         <th>Version</th>
         #foreach ($env in $environments)
-        <th>$env</th>
+        <th class="env_item $env">$env</th>
         #end  
     </tr>
     </thead>    
@@ -83,7 +114,7 @@ Report Details:
                     </td>
                     #foreach ($env in $environments)
                     #set ($duration = false)
-                    <td>
+                    <td class="env_item $env">
                         #set ($duration = $durationMap.get($env))                 
                         #if($duration)
                            $issue.formatDuration($duration)

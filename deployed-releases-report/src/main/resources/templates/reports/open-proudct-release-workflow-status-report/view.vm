@@ -4,6 +4,25 @@ $webResourceManager.requireResourcesForContext("jira-report-plugin")
 <script>
 AJS.$(document).ready(function() {
     AJS.$("#download-excel-link").attr("href", AJS.$(".excel a").attr("href"));
+    
+    
+    
+    //Filtering function for the deployment environments
+    AJS.$("#environmentFilter").on( "change",  function(e){
+        var selectedVal = AJS.$("#environmentFilter").val();
+        AJS.$(".env_item").show();
+        
+        if(selectedVal != "all") {
+            AJS.$(".env_item").each(function() {
+                if(!AJS.$(this).hasClass(selectedVal)) {
+                    AJS.$(this).hide();
+                }
+            });
+        }
+        
+    });
+    
+    
 });
 </script>
 #end
@@ -39,6 +58,18 @@ Report Information:
    <table class="table-desc">
    <tr><td>Project Name:</td><td>$projectName</td></tr>
 	<tr><td>Generated On:</td><td>$dateTimeFormatter.format($today)</td></tr>
+       #if($isExcel == false)
+       <tr><td>Environment Filter:</td>
+            <td>
+                <select id="environmentFilter">
+                  <option value="all">All</option>
+                  #foreach ($env in $environments)
+                  <option value="$env">$env</option>
+                  #end
+                </select>
+            </td>
+      </tr>
+      #end
    </table>
 </div>
 <br />
@@ -53,7 +84,7 @@ Report Details:
         <th>Issue Id</th>
         <th>Title</th>            
         #foreach ($env in $environments)
-        <th>$env</th>
+        <th class="env_item $env">$env</th>
         #end  
     </tr>
     </thead>    
@@ -68,7 +99,7 @@ Report Details:
                     $issue.getIssueTitle()
                 </td>
                 #foreach ($env in $environments)
-                <td>
+                <td class="env_item $env">
                     #set ($statusObjArr = false)
                     #set ($statusObjArr = $envStatusMap.get($env))
                     #if ($statusObjArr)                 

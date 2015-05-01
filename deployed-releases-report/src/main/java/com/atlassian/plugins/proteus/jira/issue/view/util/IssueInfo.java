@@ -407,6 +407,16 @@ public class IssueInfo implements Comparable<IssueInfo> {
         return count;
     }
 
+    public List<DeploymentActivityRecord> getFailedDeployments() {
+        List<DeploymentActivityRecord> result = new ArrayList<DeploymentActivityRecord>();
+        for (DeploymentActivityRecord activity : activityRcd) {
+            if (activity.getAction().equalsIgnoreCase(DeploymentActivityRecord.ACTION_TYPE_FAIL_DEPLOYED)) {
+                result.add(activity);
+            }
+        }
+        return result;
+    }
+
     private SortableChangeHistoryItem getItemBefore(List<SortableChangeHistoryItem> itemLst, Timestamp timestamp) {
         for (int i = 0; i < itemLst.size(); i++) {
             if (itemLst.get(i).getCreated().before(timestamp)) {

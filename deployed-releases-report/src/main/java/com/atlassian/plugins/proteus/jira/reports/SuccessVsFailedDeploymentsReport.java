@@ -182,6 +182,7 @@ public class SuccessVsFailedDeploymentsReport extends AbstractReport {
         velocityParams.put("dateFormatter", dateTimeFormatter.withStyle(DateTimeStyle.DATE_PICKER).forLoggedInUser());
         velocityParams.put("dateTimeFormatter", dateTimeFormatter.withStyle(DateTimeStyle.COMPLETE).forLoggedInUser());
         velocityParams.put("pieChartData", pieChartData);
+        velocityParams.put("issues", data);
         velocityParams.put("today", new Date());
         velocityParams.put("isExcel", isExcel);
 

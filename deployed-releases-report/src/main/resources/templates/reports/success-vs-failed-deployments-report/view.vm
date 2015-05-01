@@ -109,3 +109,38 @@ Report Details:
     </table>
 #end
 </div>
+
+<!--Report Details section-->
+<div class="report-section-header">
+Failed Releases:
+</div>
+<table class="table table-striped table-report">
+    <thead>
+    <tr>
+        <th>Issue Id</th>
+        <th>Title</th>
+        <th>Failures</th>
+    </tr>
+    </thead>    
+    #foreach ($issue in $issues)
+        #if($issue.isEverDeployed())   
+            #set($activityLst = $issue.getFailedDeployments())
+            #if($activityLst.size() > 0) 
+            <tr>
+                <td>
+                    <a href="/browse/$issue.getIssueKey()">$issue.getIssueKey()</a>
+                </td>       
+                <td>
+                    $issue.getIssueTitle()
+                </td> 
+                <td>
+                    #foreach ($activity in $activityLst)
+                        <p>$dateFormatter.format($activity.getActionDate()) ($activity.getEnvironment())</p>
+                    #end
+                </td>                   
+            </tr>
+            #end
+        #end
+    #end
+</table>
+</div>

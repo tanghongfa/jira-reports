@@ -135,7 +135,7 @@ Failed Releases:
                 </td> 
                 <td>
                     #foreach ($activity in $activityLst)
-                        <p>$dateFormatter.format($activity.getActionDate()) ($activity.getEnvironment())</p>
+                        <p>$dateTimeFormatter.format($activity.getActionDate()) ($activity.getEnvironment())</p>
                     #end
                 </td>                   
             </tr>

@@ -31,7 +31,9 @@
              <key>projectid</key>
              <name>report.issuecreation.projectid.name</name>
              <description>report.issuecreation.projectid.description</description>
-             <type>filterprojectpicker</type>
+             <!-- <type>filterprojectpicker</type> -->
+             <type>select</type>
+             <values class="com.atlassian.plugins.proteus.jira.issue.view.util.JiraCurrentProjectValueProvider"/>
          </property>
          <property>
              <key>startDate</key>
@@ -74,7 +76,9 @@
              <key>projectid</key>
              <name>report.issuecreation.projectid.name</name>
              <description>report.issuecreation.projectid.description</description>
-             <type>filterprojectpicker</type>
+             <!-- <type>filterprojectpicker</type> -->
+             <type>select</type>
+             <values class="com.atlassian.plugins.proteus.jira.issue.view.util.JiraCurrentProjectValueProvider"/>
          </property>            
    </properties>
   </report>
@@ -89,7 +93,9 @@
              <key>projectid</key>
              <name>report.issuecreation.projectid.name</name>
              <description>report.issuecreation.projectid.description</description>
-             <type>filterprojectpicker</type>
+             <!-- <type>filterprojectpicker</type> -->
+             <type>select</type>
+             <values class="com.atlassian.plugins.proteus.jira.issue.view.util.JiraCurrentProjectValueProvider"/>
          </property>
          <property>
              <key>startDate</key>
@@ -116,7 +122,9 @@
              <key>projectid</key>
              <name>report.issuecreation.projectid.name</name>
              <description>report.issuecreation.projectid.description</description>
-             <type>filterprojectpicker</type>
+             <!-- <type>filterprojectpicker</type> -->
+             <type>select</type>
+             <values class="com.atlassian.plugins.proteus.jira.issue.view.util.JiraCurrentProjectValueProvider"/>
          </property>
          <property>
              <key>startDate</key>
@@ -143,7 +151,9 @@
              <key>projectid</key>
              <name>report.issuecreation.projectid.name</name>
              <description>report.issuecreation.projectid.description</description>
-             <type>filterprojectpicker</type>
+             <!-- <type>filterprojectpicker</type> -->
+             <type>select</type>
+             <values class="com.atlassian.plugins.proteus.jira.issue.view.util.JiraCurrentProjectValueProvider"/>
          </property>
          <property>
              <key>startDate</key>

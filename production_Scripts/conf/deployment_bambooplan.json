@@ -1,27 +1,109 @@
-{ 
-   "Puppet Auto Deploy Demo" : {
-		"customFields":{  
-			 "deployEnviornmentField":"DVN2 Environment",
-			 "deploymentResultFeild":"Deployment Verification Outcome"
-			 "isRollbackIndicationField":"is_rollback",
-			 "deployComponents" : [ 
-				{
-					"deployComponentNameField" : "DVN2 Deploy Component",
-					"deployComponentTargetVersionField" : "Release Version",
-					"deployComponentCurrentVersionField" : "Current Version",
-				}			 
-			 ]
-		},
-		"bambooPuppetAutoDeployPlan":{  
-			 "baseUrl":"http://10.208.78.40:5020/rest/api/latest/queue/",
-			 "authUser":"bamboo_service_user",
-			 "authPwd":"test1234",
-			 "environmentToPlanIdMapping":{  
-				"DEV2":"PRCCMS-PAD0",
-				"SIT":"PRCCMS-PAD5",
-				"Model":"PRCCMS-PAD4",
-				"Standby":"PRCCMS-PAD0",
-			 }
-		}
-	}
+{  
+   "Puppet Auto Deploy Demo":{  
+      "customFields":{  
+         "deployEnviornmentField":"DVN2 Environment",
+         "deploymentResultFeild":"Deployment Verification Outcome",
+         "isRollbackIndicationField":"is_rollback",
+         "deployComponents":[  
+            {  
+               "deployComponentNameField":"DVN2 Deploy Component",
+               "deployComponentTargetVersionField":"Release Version",
+               "deployComponentCurrentVersionField":"Current Version"
+            }
+         ]
+      },
+      "puppetControlRepo":{  
+         "url":"ssh://git@10.208.78.39:7999/padp/puppet-control-repo.git",
+         "parameterFileName":"bamboo_parameters.properties",
+         "environmentToBranchMapping":{  
+            "DEV":"dev",
+            "SIT":"sit",
+            "MODEL":"model"
+         }
+      },
+      "hieradata":{  
+         "platform":"DVN2",
+         "components":{  
+            "Rollback Version":"linkmanager_version",
+            "Drupal Rollback Version":"test_version"
+         }
+      },
+      "jiraToBambooVariables":{  
+         "deploy":{  
+            "LINKMANAGER_VERSION":"Release Version",
+            "TEST_VERSION":"Drupal Version"
+         },
+         "rollback":{  
+            "LINKMANAGER_VERSION":"Rollback Version",
+            "TEST_VERSION":"Drupal Rollback Version"
+         }
+      },
+      "bambooPuppetAutoDeployPlan":{  
+         "baseUrl":"http://10.208.78.40:5020/rest/api/latest/queue/",
+         "authUser":"bamboo_service_user",
+         "authPwd":"test1234",
+         "environmentToPlanIdMapping":{  
+            "DEV":"PRCCMS-PAD0",
+            "SIT":"PRCCMS-PAD5",
+            "PSM":"PRCCMS-PAD4"
+         }
+      },
+      "bambooPuppetAutoRollbackPlan":{  
+         "baseUrl":"http://10.208.78.40:5020/rest/api/latest/queue/",
+         "authUser":"bamboo_service_user",
+         "authPwd":"test1234",
+         "environmentToPlanIdMapping":{  
+            "DEV":"PRCCMS-PAD0",
+            "SIT":"PRCCMS-PAD5",
+            "PSM":"PRCCMS-PAD4"
+         }
+      }
+   },
+   "DVN2 Dimetis release":{  
+      "customFields":{  
+         "deployEnviornmentField":"DVN2 Environment",
+         "deployComponentField":"DVN2 Deploy Component",
+         "deployComponentNewVersionField":"Release Version",
+         "deployComponentOldVersionField":"Rollback Version",
+         "isRollbackIndicationField":"is_rollback"
+      },
+      "puppetControlRepo":{  
+         "url":"ssh://git@10.208.78.39:7999/dvn2/dvn2-puppet-control-repo.git",
+         "parameterFileName":"bamboo_parameters.properties",
+         "environmentToBranchMapping":{  
+            "DEV2":"dev2",
+            "SIT":"sit",
+            "Model":"model"
+         }
+      },
+      "hieradata":{  
+         "platform":"DVN2",
+         "components":{  
+            "Rollback Version":"linkmanager_version"
+         }
+      },
+      "bambooPuppetAutoDeployPlan":{  
+         "baseUrl":"http://10.208.78.40:5020/rest/api/latest/queue/",
+         "authUser":"bamboo_service_user",
+         "authPwd":"test1234",
+         "environmentToPlanIdMapping":{  
+            "DEV2":"DVN2-DVN2PUP0",
+            "SIT":"DVN2-DVN2PUP1",
+            "Model":"DVN2-DVN2PUP2"
+         }
+      },
+      "jiraToBambooVariables":{  
+         "LINKMANAGER_VERSION":"Release Version"
+      },
+      "bambooPuppetAutoRollbackPlan":{  
+         "baseUrl":"http://10.208.78.40:5020/rest/api/latest/queue/",
+         "authUser":"bamboo_service_user",
+         "authPwd":"test1234",
+         "environmentToPlanIdMapping":{  
+            "DEV2":"DVN2-DVN2RCK0",
+            "SIT":"",
+            "Model":""
+         }
+      }
+   }
 }

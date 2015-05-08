@@ -114,10 +114,17 @@ try {
     //Right now, only need to capture the Deployment Activity, not Rollback
     String action = "start_deploy"
     def depEnvironment = getCustomField(configurations.customFields.deployEnviornmentField)
-    def depComponent = getCustomField(configurations.customFields.deployComponentField)
-    def depComponentVer = getCustomField(configurations.customFields.deployComponentNewVersionField)
+    def depCompLst = ""
+    configurations.customFields.deployComponents.each {
+        def depComponentName = getCustomField(it.deployComponentNameField)
+        def depComponentVer = getCustomField(it.deployComponentTargetVersionField)
+        depCompLst += "$depComponentName:$depComponentVer,"
+    }
 
-    String deploymentTag = "$action,$depEnvironment,$depComponent:$depComponentVer"
+    //def depComponent = getCustomField(configurations.customFields.deployComponentField)
+    //def depComponentVer = getCustomField(configurations.customFields.deployComponentNewVersionField)
+
+    String deploymentTag = "$action,$depEnvironment,$depCompLst"
     setCustomField("_deployment_tracker", deploymentTag, currentUser)
 
     collectLogging("#AutoBuild -- Successfully updated deployment tracker, $deploymentTag", outputLogWriter)

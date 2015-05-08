@@ -2,11 +2,15 @@
    "Puppet Auto Deploy Demo" : {
 		"customFields":{  
 			 "deployEnviornmentField":"DVN2 Environment",
-			 "deployComponentField":"DVN2 Deploy Component",
-			 "deployComponentNewVersionField":"Release Version",
-			 "deployComponentOldVersionField":"Current Version",
-			 "isRollbackIndicationField":"is_rollback",
 			 "deploymentResultFeild":"Deployment Verification Outcome"
+			 "isRollbackIndicationField":"is_rollback",
+			 "deployComponents" : [ 
+				{
+					"deployComponentNameField" : "DVN2 Deploy Component",
+					"deployComponentTargetVersionField" : "Release Version",
+					"deployComponentCurrentVersionField" : "Current Version",
+				}			 
+			 ]
 		},
 		"bambooPuppetAutoDeployPlan":{  
 			 "baseUrl":"http://10.208.78.40:5020/rest/api/latest/queue/",

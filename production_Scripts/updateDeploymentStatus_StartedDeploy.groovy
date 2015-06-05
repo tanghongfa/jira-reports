@@ -115,14 +115,11 @@ try {
     String action = "start_deploy"
     def depEnvironment = getCustomField(configurations.customFields.deployEnviornmentField)
     def depCompLst = ""
-    configurations.customFields.deployComponents.each {
-        def depComponentName = getCustomField(it.deployComponentNameField)
-        def depComponentVer = getCustomField(it.deployComponentTargetVersionField)
+    configurations.customFields.deployComponents.each { key, value ->
+        def depComponentName = key
+        def depComponentVer = getCustomField(value.deployComponentTargetVersionField)
         depCompLst += "$depComponentName:$depComponentVer,"
     }
-
-    //def depComponent = getCustomField(configurations.customFields.deployComponentField)
-    //def depComponentVer = getCustomField(configurations.customFields.deployComponentNewVersionField)
 
     String deploymentTag = "$action,$depEnvironment,$depCompLst"
     setCustomField("_deployment_tracker", deploymentTag, currentUser)

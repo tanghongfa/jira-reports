@@ -33,20 +33,20 @@ public class JiraReportUtils {
     private static final Logger log = Logger.getLogger(JiraReportUtils.class);
 
     private final static String JIRA_JSON_CONFIGURATION_CUSTOM_FIELDS_CONFIGURATION_ITEM = "customFields";
-    private final static String JIRA_JSON_CONFIGURATION_ITEM_CUSTOM_FILED_DEPLOYMENT_ENV = "deployEnviornmentField";
+    private final static String JIRA_JSON_CONFIGURATION_ITEM_CUSTOM_FILED_DEPLOYMENT_ENV = "deployEnvironmentField";
 
     /**
      * <code>JIRA_CUSTOM_FILED_DEPLOYMENT_TRACKER</code>
      */
     public final static String JIRA_CUSTOM_FILED_DEPLOYMENT_TRACKER = "_deployment_tracker";
 
-    private static String getJiraJsonConfigurationFileName() {
+    private static String getJiraJsonConfigurationFileName(String issueType) {
         String baseFolder = "/opt/atlassian/jira/scripts/conf/";
         String osName = System.getProperty("os.name");
         if ((osName != null) && osName.toLowerCase().contains("windows")) {
             baseFolder = "C:\\jira_reports\\scripts\\conf\\";
         }
-        return baseFolder + "deployment_bambooplan.json";
+        return baseFolder + issueType.replaceAll(" ", "_") + ".json";
     }
 
     /**
@@ -56,16 +56,13 @@ public class JiraReportUtils {
     public static String getDeployEnvironmentCustomFieldName(String issueType) {
         Scanner fileScanner = null;
         try {
-            fileScanner = new Scanner(new File(getJiraJsonConfigurationFileName()));
+            fileScanner = new Scanner(new File(getJiraJsonConfigurationFileName(issueType)));
             String content = fileScanner.useDelimiter("\\Z").next();
-            JSONObject obj = new JSONObject(content);
 
-            JSONObject issueTypeConfiguration = obj.getJSONObject(issueType);
-            if (issueTypeConfiguration != null) {
-                JSONObject customFieldConfiguraiton = issueTypeConfiguration
-                        .getJSONObject(JIRA_JSON_CONFIGURATION_CUSTOM_FIELDS_CONFIGURATION_ITEM);
-                return customFieldConfiguraiton.getString(JIRA_JSON_CONFIGURATION_ITEM_CUSTOM_FILED_DEPLOYMENT_ENV);
-            }
+            JSONObject issueTypeConfiguration = new JSONObject(content);
+            JSONObject customFieldConfiguraiton = issueTypeConfiguration
+                    .getJSONObject(JIRA_JSON_CONFIGURATION_CUSTOM_FIELDS_CONFIGURATION_ITEM);
+            return customFieldConfiguraiton.getString(JIRA_JSON_CONFIGURATION_ITEM_CUSTOM_FILED_DEPLOYMENT_ENV);
         } catch (JSONException e) {
             //Ignore -- It's quite normal
         } catch (Exception e) {
@@ -94,29 +91,17 @@ public class JiraReportUtils {
 
     private static List<String> getReleaseIssueTypes(List<String> issueTypes) {
         List<String> result = new ArrayList<String>();
-        Scanner fileScanner = null;
         try {
-            fileScanner = new Scanner(new File(getJiraJsonConfigurationFileName()));
-            String content = fileScanner.useDelimiter("\\Z").next();
-            JSONObject obj = new JSONObject(content);
-
             for (String issueType : issueTypes) {
-                try {
-                    JSONObject issueTypeConfiguration = obj.getJSONObject(issueType);
-                    if (issueTypeConfiguration != null) {
-                        result.add(issueType);
-                    }
-                } catch (JSONException e) {
-                    //It's normall
+                File file = new File(getJiraJsonConfigurationFileName(issueType));
+                //If configuration file exists, then it will be recognized as Release Issue Type (For other issue types, they shouldn't have configuration file there)
+                if (file.exists()) {
+                    result.add(issueType);
                 }
             }
             //Ignore -- It's quite normal
         } catch (Exception e) {
             log.error(e.getMessage());
-        } finally {
-            if (fileScanner != null) {
-                fileScanner.close();
-            }
         }
         return result;
     }

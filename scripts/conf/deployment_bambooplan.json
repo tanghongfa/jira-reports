@@ -1,7 +1,7 @@
 { 
 	"Telstra Releases":{  
       "customFields":{  
-         "deployEnviornmentField":"DVN2 Environment",
+         "deployEnvironmentField":"DVN2 Environment",
          "deployComponentField":"Deployment Component",
          "deployComponentNewVersionField":"Component Version",
          "deployComponentOldVersionField":"Current Version",
@@ -11,7 +11,7 @@
    },
    "Puppet Auto Deploy Demo" : {
 		"customFields":{  
-			 "deployEnviornmentField":"DVN2 Environment",
+			 "deployEnvironmentField":"DVN2 Environment",
 			 "deployComponentField":"DVN2 Deploy Component",
 			 "deployComponentNewVersionField":"Release Version",
 			 "deployComponentOldVersionField":"Current Version",

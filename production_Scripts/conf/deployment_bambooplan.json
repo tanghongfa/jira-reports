@@ -4,13 +4,12 @@
          "deployEnviornmentField":"DVN2 Environment",
          "deploymentResultFeild":"Deployment Verification Outcome",
          "isRollbackIndicationField":"is_rollback",
-         "deployComponents":[  
-            {  
-               "deployComponentNameField":"DVN2 Deploy Component",
+         "deployComponents":{  
+            "Dimetis" : {
                "deployComponentTargetVersionField":"Release Version",
                "deployComponentCurrentVersionField":"Current Version"
             }
-         ]
+         }
       },
       "puppetControlRepo":{  
          "url":"ssh://git@10.208.78.39:7999/padp/puppet-control-repo.git",
@@ -59,13 +58,17 @@
          }
       }
    },
-   "DVN2 Dimetis release":{  
-      "customFields":{  
-         "deployEnviornmentField":"DVN2 Environment",
-         "deployComponentField":"DVN2 Deploy Component",
-         "deployComponentNewVersionField":"Release Version",
-         "deployComponentOldVersionField":"Rollback Version",
-         "isRollbackIndicationField":"is_rollback"
+   "DVN2 Dimetis release":{
+	  "customFields":{  
+         "deployEnvironmentField":"DVN2 Environment",
+         "deploymentResultFeild":"Deployment Verification Outcome",
+         "isRollbackIndicationField":"is_rollback",
+         "deployComponents":{  
+            "Dimetis LinkManager" : {
+               "deployComponentTargetVersionField":"Release Version",
+               "deployComponentCurrentVersionField":"Rollback Version"
+            }
+         }
       },
       "puppetControlRepo":{  
          "url":"ssh://git@10.208.78.39:7999/dvn2/dvn2-puppet-control-repo.git",
